@@ -6,13 +6,13 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/29 15:50:21 by gborne           ###   ########.fr       */
+/*   Updated: 2022/11/29 17:55:16 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
 
-Server::Server( void ) : _host("localhost"), _port(80), _errorPath("errorPages/"), _bodyLimit(1980) {
+Server::Server( void ) : _host("localhost"), _port(80), _errorPath("err/"), _bodyLimit(1980) {
 	return ;
 }
 
