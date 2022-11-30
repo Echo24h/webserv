@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:24:04 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/29 15:50:17 by gborne           ###   ########.fr       */
+/*   Updated: 2022/11/30 03:22:24 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ Config::tokens Config::_tokenizeConfig( void ) const {
 	return tokens;
 }
 
-Config::tokens::iterator Config::_traitServLoc( Server * server, Config::tokens::iterator it, Config::tokens::iterator ite ) {
+Config::tokens::iterator Config::_traitServLoc( ConfigServer * server, Config::tokens::iterator it, Config::tokens::iterator ite ) {
 
 	std::string					name;
 	std::vector<std::string>	methods;
@@ -157,7 +157,7 @@ Config::tokens::iterator Config::_traitServLoc( Server * server, Config::tokens:
 	return it;
 }
 
-Config::tokens::iterator Config::_traitServParam( Server * server, Config::tokens::iterator it ) {
+Config::tokens::iterator Config::_traitServParam( ConfigServer * server, Config::tokens::iterator it ) {
 
 	if (*it == "host") {
 		it++;
@@ -204,7 +204,7 @@ void Config::_initServers( Config::tokens tokens ) {
 
 		if (*it == "server") {
 
-			Server server;
+			ConfigServer server;
 
 			it++;
 			if (*it != "{")

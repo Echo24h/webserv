@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:09:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/29 15:29:25 by gborne           ###   ########.fr       */
+/*   Updated: 2022/11/30 03:22:18 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,14 @@
 # include <fstream>
 # include <vector>
 
-# include "../inc/Server.hpp"
+# include "../inc/ConfigServer.hpp"
 
 class Config {
 
 public:
 
 	typedef	std::vector<std::string>	tokens;
-	typedef	std::vector<Server>			servers;
+	typedef	std::vector<ConfigServer>			servers;
 	typedef	servers::iterator			iterator;
 	typedef	servers::const_iterator		const_iterator;
 
@@ -54,8 +54,8 @@ private:
 	// Parse Config to Servers functions
 
 	tokens		_tokenizeConfig( void ) const;
-	tokens::iterator	_traitServLoc( Server * server, tokens::iterator it, tokens::iterator ite );
-	tokens::iterator	_traitServParam( Server * server, tokens::iterator it );
+	tokens::iterator	_traitServLoc( ConfigServer * server, tokens::iterator it, tokens::iterator ite );
+	tokens::iterator	_traitServParam( ConfigServer * server, tokens::iterator it );
 	void		_initServers( tokens tokens );
 
 	// Privates members

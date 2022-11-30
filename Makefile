@@ -6,13 +6,15 @@
 #    By: gborne <gborne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/27 16:29:59 by gborne            #+#    #+#              #
-#    Updated: 2022/11/28 16:21:27 by gborne           ###   ########.fr        #
+#    Updated: 2022/11/30 03:23:02 by gborne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SRCS			=	main.cpp \
 					src/Config.cpp \
-					src/Server.cpp
+					src/ConfigServer.cpp \
+					src/Server.cpp \
+					src/Client.cpp
 
 OBJS			= $(SRCS:.cpp=.o)
 

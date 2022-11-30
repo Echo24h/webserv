@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/29 14:44:12 by gborne           ###   ########.fr       */
+/*   Created: 2022/11/30 03:18:38 by gborne            #+#    #+#             */
+/*   Updated: 2022/11/30 03:41:27 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,77 +14,24 @@
 # define SERVER_HPP
 
 # include <iostream>
-# include <vector>
+# include <unistd.h>
+# include <string.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <arpa/inet.h>
+# include <sys/wait.h>
 
-struct Location {
+#define MYPORT 3490	/* Le port où les utilisateurs se connecteront */
 
-	std::string					name;
-	std::vector<std::string>	methods;
-	std::string					index;
-	std::string					root;
-	std::string					php;
-	std::string					cgi;
-
-};
+#define BACKLOG 10	/* Nombre maxi de connections acceptées en file */
 
 class Server {
 
 public:
 
-	typedef std::vector<Location>	locations;
-
-	// CANONICAL FORM
-
-	Server( void );
-
-	Server( std::string host, int port, std::string errorPath );
-
-	Server( Server const & src );
-
-	~Server();
-
-	Server &	operator=( Server const & rhs );
-
-	// SETTERS
-
-	void	setHost( std::string host );
-
-	void	setPort( int port );
-
-	void	setServerName( std::string serverName );
-
-	void	setErrorPath( std::string errorPath );
-
-	void	setBodyLimit( int bodyLimit );
-
-	void	addLocation( std::string name, std::vector<std::string> methods,
-		std::string index, std::string root, std::string php, std::string cgi );
-
-	// GETTERS
-
-	std::string	getHost( void ) const;
-
-	int			getPort( void ) const;
-
-	std::string	getServerName( void ) const;
-
-	std::string	getErrorPath( void ) const;
-
-	int			getBodyLimit( void ) const;
-
-	locations	getLocations( void ) const;
-
-private:
-
-	std::string			_host;
-	int					_port;
-	std::string			_serverName;
-	std::string			_errorPath;
-	int					_bodyLimit;
-	locations			_locations;
+	void    run( void );
 
 };
-
-std::ostream &	operator<<( std::ostream & o, Server const & rhs );
 
 #endif

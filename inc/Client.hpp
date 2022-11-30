@@ -1,45 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Listener.hpp                                       :+:      :+:    :+:   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/11/29 17:06:41 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/29 17:13:31 by gborne           ###   ########.fr       */
+/*   Created: 2022/11/30 03:18:44 by gborne            #+#    #+#             */
+/*   Updated: 2022/11/30 03:42:16 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LISTENER_HPP
-# define LISTENER_HPP
+#ifndef CLIENT_CPP
+# define CLIENT_CPP
 
-# include "Server.hpp"
+# include <stdio.h>
+# include <stdlib.h>
+# include <errno.h>
+# include <string.h>
+# include <netdb.h>
+# include <sys/types.h>
+# include <netinet/in.h>
+# include <sys/socket.h>
 
-class Listener {
+#define PORT 3490 /* Le port où le client se connectera */
 
+#define MAXDATASIZE 100 /* Tampon d'entrée */
+
+class Client {
+	
 public:
 
-	// CANONICAL FORM
-
-	Listener( void );
-
-	Listener( Server & server );
-
-	Listener( Listener const & src );
-
-	~Listener();
-
-	Listener &	operator=( Listener const & rhs );
-
-	// FUNCTIONS
-
-	bool	init( void );
-
-	bool	run( void );
-
-private:
-
-	Server &	_server;
+	void    run( void );
 
 };
 
