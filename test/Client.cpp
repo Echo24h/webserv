@@ -6,14 +6,14 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:13:59 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/30 04:06:02 by gborne           ###   ########.fr       */
+/*   Updated: 2022/11/30 15:42:14 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-void    run( void ) {
-	int sockfd, numbytes;  
+int	main ( int 	argc, char ** argv ) {
+	int sockfd, numbytes;
 	char buf[MAXDATASIZE];
 	struct hostent *he;
 	struct sockaddr_in their_addr; /* Adresse de celui qui se connecte */

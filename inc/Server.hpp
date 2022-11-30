@@ -6,14 +6,18 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:18:38 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/30 03:41:27 by gborne           ###   ########.fr       */
+/*   Updated: 2022/11/30 17:51:40 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+# include <stdio.h>
+# include <errno.h>
 # include <iostream>
+# include <fstream>
+# include <cstdlib>
 # include <unistd.h>
 # include <string.h>
 # include <sys/types.h>
@@ -30,7 +34,9 @@ class Server {
 
 public:
 
-	void    run( void );
+	Server( void );
+
+	void	run( void );
 
 };
 
