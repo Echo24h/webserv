@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/30 03:17:50 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/02 20:37:38 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ ConfigServer & ConfigServer::operator=( ConfigServer const & rhs ) {
 
 void	ConfigServer::setHost( std::string host ) {
 	if (host.empty())
-		throw std::invalid_argument("[ConfigServer.cpp] host is empty");
+		throw std::invalid_argument(std::string("[ConfigServer.cpp] host is empty").c_str());
 	_host = host;
 	return ;
 }

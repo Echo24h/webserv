@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:09:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/30 03:22:18 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/02 20:29:42 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <fstream>
 # include <vector>
 
+# include "message.h"
 # include "../inc/ConfigServer.hpp"
 
 class Config {
