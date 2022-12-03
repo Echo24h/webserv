@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/03 02:14:59 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 19:43:49 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,16 @@
 
 #include "../inc/Server.hpp"
 
-Server::Server( const ConfigServer & config ) : _req(config) { 
-	return ; 
+Server::Server( void ) : _config(NULL), _req(RequestHandler(_config)) {
+	return;
 }
+
+Server::Server( ConfigServer * config ) : _config(config), _req(RequestHandler(_config)) {
+
+	return ;
+}
+
+Server::~Server() { return ; }
 
 int	setup_server() {
 
@@ -59,7 +66,7 @@ int	accept_connection( int server_socket ) {
 	if ((client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addrlen)) == -1)
 		std::cerr << ERROR << "[Server.cpp] accept() : " << strerror(errno) << std::endl;
 	else
-		std::cout << REQUEST << inet_ntoa(client_addr.sin_addr) << std::endl;
+		std::cout << REQUEST << "fd: " << client_socket << ", adress: " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port) << std::endl;
 
 	return client_socket;
 }
@@ -102,7 +109,7 @@ void	Server::run( void ) {
 				} else {
 
 					// do whatever we do with connecion;
-					RequestHandler::trait_request(i);
+					_req.trait_request(i);
 					FD_CLR(i, &current_sockets);
 				}
 			}

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/02 23:32:18 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/03 03:01:06 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 07:18:20 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,23 +24,25 @@ class ServerResponse {
 
 public:
 
-    ServerResponse( void );
+	ServerResponse( void );
 
-    ServerResponse( const ConfigServer & config );
+	ServerResponse( ConfigServer * config );
 
-    //return content of the file "path"
-    std::string content( const char * path ) const;
+	~ServerResponse();
 
-    //return html reponse whit the root of the file "path"
-    std::string format( std::vector<std::string> tokens ) const;
+	//return content of the file "path"
+	std::string content( const char * path ) const;
 
-    std::string get( std::string & recv ) const;
+	//return html reponse whit the root of the file "path"
+	std::string format( std::vector<std::string> tokens ) const;
+
+	std::string get( std::string & recv ) const;
 
 private:
 
-    bool    _check( std::vector<std::string> tokens ) const;
+	bool	_check( std::vector<std::string> tokens ) const;
 
-    ConfigServer _config;
+	ConfigServer *	_config;
 
 };
 

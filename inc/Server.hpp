@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:18:38 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/03 02:14:19 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 07:17:42 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,12 +38,17 @@ class Server : public RequestHandler {
 
 public:
 
-	Server( const ConfigServer & config );
+	Server( void );
+
+	Server( ConfigServer * config );
+
+	~Server();
 
 	void	run( void );
 
 private:
 
+	ConfigServer *	_config;
 	RequestHandler	_req;
 
 };
