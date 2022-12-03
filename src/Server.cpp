@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/02 20:50:49 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 02:14:59 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 
 #include "../inc/Server.hpp"
 
-Server::Server( void ) { return ; }
+Server::Server( const ConfigServer & config ) : _req(config) { 
+	return ; 
+}
 
 int	setup_server() {
 

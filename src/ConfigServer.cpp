@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/02 20:37:38 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 04:43:31 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,24 @@ ConfigServer & ConfigServer::operator=( ConfigServer const & rhs ) {
 	_bodyLimit = rhs._bodyLimit;
 	_locations = rhs._locations;
 	return *this;
+}
+
+// ITERATORS
+
+ConfigServer::iterator ConfigServer::begin( void ) {
+	return _locations.begin();
+}
+
+ConfigServer::iterator ConfigServer::end( void ) {
+	return _locations.end();
+}
+
+ConfigServer::const_iterator ConfigServer::begin( void ) const {
+	return _locations.begin();
+}
+
+ConfigServer::const_iterator ConfigServer::end( void ) const {
+	return _locations.end();
 }
 
 // SETTERS

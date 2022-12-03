@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 16:30:46 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/30 15:45:40 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 02:13:11 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int	main( int argc, char **argv ) {
 		try {
 			Config config(argv[1]);
 			//std::cout << config << std::endl;
-			Server server;
+			Server server(*config.begin());
 			server.run();
 		} catch(const std::exception& e) {
 			std::cerr << e.what() << std::endl;

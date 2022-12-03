@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:18:38 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/02 20:29:58 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 02:14:19 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 
 # include "message.h"
 # include "../inc/RequestHandler.hpp"
+# include "../inc/ConfigServer.hpp"
 
 #define MYPORT 3490	/* Le port où les utilisateurs se connecteront */
 
@@ -37,9 +38,13 @@ class Server : public RequestHandler {
 
 public:
 
-	Server( void );
+	Server( const ConfigServer & config );
 
 	void	run( void );
+
+private:
+
+	RequestHandler	_req;
 
 };
 

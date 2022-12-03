@@ -6,31 +6,18 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/02 20:00:17 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/02 20:57:29 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 03:07:12 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/RequestHandler.hpp"
 
-RequestHandler::RequestHandler( void ) {
+RequestHandler::RequestHandler( void ) : _response(ServerResponse()) {
 	return ;
 }
 
-char *	getHtml( const char * path ) {
-	std::string		html;
-	std::string		str;
-	std::ifstream	ifs(path);
-	char *			header = strdup("HTTP/1.1 200 OK\r\n\r\n");
-
-	while (std::getline(ifs, str))
-		html += str;
-
-	char *	result = (char *)malloc(sizeof(char *) * (html.length() + strlen(header) + 1));
-
-	strcpy(result, header);
-	strcat(result, html.c_str());
-
-	return result;
+RequestHandler::RequestHandler( const ConfigServer & config ) : _response(ServerResponse(config)) {
+	return ;
 }
 
 std::string	getRequest( int client_socket ) {
@@ -52,27 +39,78 @@ std::string	getRequest( int client_socket ) {
 	return std::string(buffer);
 }
 
+std::string	getKey( const std::string & line ) {
+
+	std::string	key = "";
+	size_t		n;
+	
+	n = line.find(':');
+	if (n > 0)
+		key = line.substr(0, n);
+	return key;
+}
+
+std::string	getValue( const std::string & line ) {
+
+	std::string	value = "";
+	size_t		n;
+	
+	n = line.find(':');
+	if (n > 0)
+		value = line.substr(n + 1, line.size());
+	return value;
+}
+
+std::map<std::string, std::string> tokenize( const std::string & request ) {
+	
+	std::map<std::string, std::string> tokens;
+
+	std::stringstream	stream(request);
+	std::string 		cursor;
+
+	std::string			key;
+	std::string			value;
+
+	// insert the first line
+	getline(stream, cursor, '\n');
+	tokens.insert(std::make_pair(std::string("Reqv"), cursor));
+
+	// insert other line
+	while(getline(stream, cursor, '\n')) {
+		key = getKey(cursor);
+		value = getValue(cursor);
+		if (key == "" || value == "")
+			std::cerr << ERROR << "[Server.cpp] tokenize() : Wrong request format" << std::endl;
+		else
+			tokens.insert(std::make_pair(key, value));
+	}
+
+	return tokens;
+}
+
 void	RequestHandler::trait_request( int client_socket ) {
 
-	std::string request = getRequest(client_socket);
+	std::string 						request = getRequest(client_socket);
+	std::map<std::string, std::string>	tokens = tokenize(request);
 
+	std::cout << RECV << tokens["Reqv"] << std::endl;
 
-	std::cout << RECV << request << std::endl;
+	std::string response = _response.get(tokens["Reqv"]);
 
-	if (fork() == 0) { // processus fils
+	if (response == "")
+		std::cerr << ERROR << "Wrong format request" << std::endl;
+	else {
 
-		char * html = getHtml("www/index.html");
+		std::cout << SEND << response << std::endl;
+		
+		if (fork() == 0) { // processus fils
 
-		std::stringstream ss(std::string(html));
-		std::string header;
-		getline(ss, header, '\n');
-
-		std::cout << SEND << "www/index.html" << std::endl;
-
-		if (send(client_socket, html, strlen(html), 0) == -1)
-			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
-		close(client_socket);
-		exit(0);
+			if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+				std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
+			
+			close(client_socket);
+			exit(0);
+		}
 	}
 	close(client_socket);  // Le parent n'a pas besoin de cela
 

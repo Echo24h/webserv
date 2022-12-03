@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/02 20:29:32 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/03 04:46:53 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,13 +27,24 @@ struct Location {
 	std::string					php;
 	std::string					cgi;
 
+	Location & operator=( Location const & rhs ) {
+		this->name = rhs.name;
+		this->methods = rhs.methods;
+		this->index = rhs.index;
+		this->root = rhs.root;
+		this->php = rhs.php;
+		this->cgi = rhs.cgi;
+		return *this;
+	}
 };
 
 class ConfigServer {
 
 public:
 
-	typedef std::vector<Location>	locations;
+	typedef std::vector<Location>			locations;
+	typedef locations::iterator				iterator;
+	typedef locations::const_iterator		const_iterator;
 
 	// CANONICAL FORM
 
@@ -46,6 +57,16 @@ public:
 	~ConfigServer();
 
 	ConfigServer &	operator=( ConfigServer const & rhs );
+
+	// ITERATORS
+
+	iterator		begin( void );
+
+	iterator		end( void );
+
+	const_iterator	begin( void ) const;
+
+	const_iterator	end( void ) const;
 
 	// SETTERS
 
