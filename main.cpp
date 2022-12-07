@@ -6,13 +6,12 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 16:30:46 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/03 17:19:18 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/05 18:14:25 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include "inc/Config.hpp"
 #include "inc/Server.hpp"
+#include "inc/Config.hpp"
 
 int	main( int argc, char **argv ) {
 	if (argc != 2)
@@ -28,3 +27,4 @@ int	main( int argc, char **argv ) {
 		}
 	}
 }
+

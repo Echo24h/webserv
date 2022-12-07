@@ -6,21 +6,20 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:09:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/02 20:29:42 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/05 18:07:00 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONFIG_HPP
 # define CONFIG_HPP
 
+# include "ConfigServer.hpp"
+
 # include <iostream>
 # include <cstring>
 # include <cstdlib>
 # include <fstream>
 # include <vector>
-
-# include "message.h"
-# include "../inc/ConfigServer.hpp"
 
 class Config {
 
@@ -54,10 +53,10 @@ private:
 
 	// Parse Config to Servers functions
 
-	tokens		_tokenizeConfig( void ) const;
+	tokens				_tokenizeConfig( void ) const;
 	tokens::iterator	_traitServLoc( ConfigServer * server, tokens::iterator it, tokens::iterator ite );
 	tokens::iterator	_traitServParam( ConfigServer * server, tokens::iterator it );
-	void		_initServers( tokens tokens );
+	void				_initServers( tokens tokens );
 
 	// Privates members
 

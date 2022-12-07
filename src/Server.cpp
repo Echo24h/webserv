@@ -6,26 +6,34 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/03 19:43:49 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/05 19:21:31 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// http://vidalc.chez.com/lf/socket.html
-
 #include "../inc/Server.hpp"
 
-Server::Server( void ) : _config(NULL), _req(RequestHandler(_config)) {
+Server::Server( void ) : _config(NULL) {
 	return;
 }
 
-Server::Server( ConfigServer * config ) : _config(config), _req(RequestHandler(_config)) {
+Server::Server( ConfigServer * config ) : _config(config) {
 
+	return ;
+}
+
+Server::Server( const Server & src ) {
+	*this = src;
 	return ;
 }
 
 Server::~Server() { return ; }
 
-int	setup_server() {
+Server &	Server::operator=( const Server & rhs ) {
+	_config = rhs._config;
+	return *this;
+}
+
+int	Server::_setup_server() const {
 
 	int server_socket;
 
@@ -53,7 +61,7 @@ int	setup_server() {
 	return server_socket;
 }
 
-int	accept_connection( int server_socket ) {
+int	Server::_accept_connection( int server_socket ) const {
 
 	int	client_socket;
 
@@ -66,16 +74,39 @@ int	accept_connection( int server_socket ) {
 	if ((client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addrlen)) == -1)
 		std::cerr << ERROR << "[Server.cpp] accept() : " << strerror(errno) << std::endl;
 	else
-		std::cout << REQUEST << "fd: " << client_socket << ", adress: " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port) << std::endl;
+		std::cout << CONNECT << "fd: " << client_socket << ", adress: " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port) << std::endl;
 
 	return client_socket;
+}
+
+void	Server::_handle_connexion( int client_socket ) const {
+
+	HTTP::Request	request = HTTP::Request(client_socket);
+
+	std::cout << RECV << request << std::endl;
+
+	HTTP::Response	response = HTTP::Response(_config, request);
+
+	std::string	responseStr = response.to_string();
+
+	if (responseStr.empty())
+		std::cerr << ERROR << "[Server.cpp] Empty response" << std::endl;
+	else {
+		std::cout << SEND << response << std::endl;
+
+		if (send(client_socket, responseStr.c_str(), responseStr.size(), 0) == -1)
+			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
+	}
+	close(client_socket);
+
+	std::cout << DISCONNECT << std::endl;
 }
 
 void	Server::run( void ) {
 
 	int server_socket;  /* Ecouter server_socket, nouvelle connection sur client */
 
-	server_socket = setup_server();
+	server_socket = _setup_server();
 
 	int	max_socket_so_far = 0;
 
@@ -101,7 +132,7 @@ void	Server::run( void ) {
 				if (i == server_socket) {
 					//this is a new connection
 
-					int client_socket = accept_connection(server_socket);
+					int client_socket = _accept_connection(server_socket);
 					FD_SET(client_socket, &current_sockets);
 					if (client_socket > max_socket_so_far) {
 						max_socket_so_far = client_socket;
@@ -109,7 +140,7 @@ void	Server::run( void ) {
 				} else {
 
 					// do whatever we do with connecion;
-					_req.trait_request(i);
+					_handle_connexion(i);
 					FD_CLR(i, &current_sockets);
 				}
 			}

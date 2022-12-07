@@ -6,17 +6,17 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/03 17:12:08 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/07 20:04:54 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONFIGSERVER_HPP
 # define CONFIGSERVER_HPP
 
+# include "Utils.hpp"
+
 # include <iostream>
 # include <vector>
-
-# include "message.h"
 
 struct Location {
 
@@ -26,16 +26,6 @@ struct Location {
 	std::string					root;
 	std::string					php;
 	std::string					cgi;
-
-	/*Location & operator=( Location const & rhs ) {
-		this->name = rhs.name;
-		this->methods = rhs.methods;
-		this->index = rhs.index;
-		this->root = rhs.root;
-		this->php = rhs.php;
-		this->cgi = rhs.cgi;
-		return *this;
-	}*/
 };
 
 class ConfigServer {

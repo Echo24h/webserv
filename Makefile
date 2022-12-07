@@ -6,16 +6,17 @@
 #    By: gborne <gborne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/27 16:29:59 by gborne            #+#    #+#              #
-#    Updated: 2022/12/02 23:51:39 by gborne           ###   ########.fr        #
+#    Updated: 2022/12/05 18:18:24 by gborne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SRCS			=	main.cpp \
 					src/Config.cpp \
 					src/ConfigServer.cpp \
-					src/RequestHandler.cpp \
-					src/ServerResponse.cpp \
-					src/Server.cpp
+					src/Response.cpp \
+					src/Request.cpp \
+					src/Server.cpp \
+					src/Utils.cpp
 
 SRCS_C			=	test/Client.cpp
 
