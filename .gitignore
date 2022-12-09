@@ -1,5 +1,9 @@
 # Exec
 webserv
+client
+
+# Valgrind
+*.dSYM
 
 # Prerequisites
 *.d
