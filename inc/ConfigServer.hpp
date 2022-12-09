@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/07 20:04:54 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/09 13:36:22 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,15 @@
 
 # include <iostream>
 # include <vector>
+# include <map>
 
 struct Location {
 
-	std::string					name;
-	std::vector<std::string>	methods;
-	std::string					index;
-	std::string					root;
-	std::string					php;
-	std::string					cgi;
+	std::string							name;
+	std::vector<std::string>			methods;
+	std::string							index;
+	std::string							root;
+	std::map<std::string, std::string>	cgi;
 };
 
 class ConfigServer {
@@ -71,7 +71,7 @@ public:
 	void	setBodyLimit( int bodyLimit );
 
 	void	addLocation( std::string name, std::vector<std::string> methods,
-		std::string index, std::string root, std::string php, std::string cgi );
+		std::string index, std::string root, std::map<std::string, std::string>	cgi );
 
 	// GETTERS
 

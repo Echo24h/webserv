@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/03 07:22:31 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/09 13:58:39 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,14 +96,13 @@ void	ConfigServer::setBodyLimit( int bodyLimit ) {
 }
 
 void	ConfigServer::addLocation( std::string name, std::vector<std::string> methods,
-std::string index, std::string root, std::string php, std::string cgi ) {
+std::string index, std::string root, std::map<std::string, std::string> cgi ) {
 
 	Location newLoc;
 	newLoc.name = name;
 	newLoc.methods = methods;
 	newLoc.index = index;
 	newLoc.root = root;
-	newLoc.php = php;
 	newLoc.cgi = cgi;
 	_locations.push_back(newLoc);
 	return ;
@@ -146,8 +145,13 @@ std::ostream &	operator<<( std::ostream & o, ConfigServer const & rhs ) {
 		o << std::endl;
 		o << "	index   = " << (*it).index << std::endl;
 		o << "	root    = " << (*it).root << std::endl;
-		o << "	php     = " << (*it).php << std::endl;
-		o << "	cgi     = " << (*it).cgi << std::endl;
+		o << "	cgi =" << std::endl;
+		std::map<std::string, std::string>::const_iterator it_c = (*it).cgi.begin();
+		std::map<std::string, std::string>::const_iterator ite_c = (*it).cgi.end();
+		while (it_c != ite_c) {
+			o << "		" << it_c->first << " " << it_c->second << std::endl;
+			it_c++;
+		}
 		it++;
 	}
 	return o;

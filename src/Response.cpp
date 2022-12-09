@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/07 22:12:11 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/08 15:01:36 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,14 @@ std::string	Response::to_string( void ) const {
 		ss << content;
 	}
 	else if (_code == HTTP::NOT_FOUND) {
+
+		std::string 	content = _content(_config->getErrorPath() + "404.html");
+
 		ss << "HTTP/1.1 " << _code << " Not Found\r\n";
+		ss << "Content-Type: " << "text/html" << "\r\n";
+		ss << "Content-Length: " << content.size() << "\r\n";
+		ss << "Connection: keep-alive\r\n\r\n";
+		ss << content;
 	}
 	response = ss.str();
 
@@ -102,38 +109,48 @@ std::string Response::_content( const std::string & path ) const {
 
 std::string	Response::_get_file_path( const std::string & location, const std::string & method ) const {
 
-	std::cout << "location=" << location << std::endl;
-
 	// secure "../" access
 	if (location.find("..") == (size_t)-1) {
 
 		// check location in config
-		ConfigServer::locations	loc = _config->getLocations();
-		ConfigServer::locations::const_iterator	it = loc.begin();
-		ConfigServer::locations::const_iterator	ite = loc.end();
+		ConfigServer::locations				loc = _config->getLocations();
+		ConfigServer::locations::iterator	it = loc.begin();
+		ConfigServer::locations::iterator	ite = loc.end();
 
-		ConfigServer::locations::const_iterator	def;
+		Location *							target_loc = NULL;
 
 		while (it != ite) {
-			//save the default location
-			if (it->name == "/")
-				def = it;
-			if (it->name == location) {
-
-				std::vector<std::string>::const_iterator methods_it = it->methods.begin();
-				std::vector<std::string>::const_iterator methods_ite = it->methods.end();
-
-				while (methods_it != methods_ite) {
-					if (*methods_it == method)
-						return it->root + it->index;
-					methods_it++;
-				}
-			}
+			if (location.find(it->name) == 0)
+				if (target_loc == NULL || target_loc->name.size() < it->name.size())
+					target_loc = &(*it);
 			it++;
 		}
-		//if there are no targeted locations, we take the location "/"
-		if (file_exist(std::string(def->root + location))) {
-			return std::string(def->root + location);
+
+		if (target_loc == NULL)
+			std::cerr << ERROR << "[Response.cpp] _get_file_path() : location " << location << " not found" << std::endl;
+		else {
+
+			std::vector<std::string>::const_iterator methods_it = target_loc->methods.begin();
+			std::vector<std::string>::const_iterator methods_ite = target_loc->methods.end();
+
+			size_t	start;
+			target_loc->name.size() > 1 ? start = target_loc->name.size() + 1 : start = target_loc->name.size();
+			std::string path = location.substr(start, location.size() - start);
+
+			while (methods_it != methods_ite) {
+
+				if (*methods_it == method) {
+					if (file_exist(target_loc->root + path))
+						return target_loc->root + path;
+					else if (target_loc->name.size() == location.size() && file_exist(target_loc->root + target_loc->index))
+						return target_loc->root + target_loc->index;
+					else
+						std::cerr << ERROR << "[Response.cpp] _get_file_path() : file " << target_loc->root + path << " or " << target_loc->root + target_loc->index << " not found" << std::endl;
+					return std::string();
+				}
+				methods_it++;
+			}
+			std::cerr << ERROR << "[Response.cpp] _get_file_path() : method " << method << " not found" << std::endl;
 		}
 	}
 	return std::string();
@@ -168,7 +185,7 @@ void	Response::_get( const std::string & location ) {
 	if (_file_path.empty())
 		std::cerr << ERROR << "[Response.cpp] _get() : " + location + " doesn't exist" << std::endl;
 	_file_type = _get_file_type(_file_path);
-	if (_file_type.empty())
+	if (!_file_path.empty() && _file_type.empty())
 		std::cerr << ERROR << "[Response.cpp] _get() : extension file doesn't exist" << std::endl;
 }
 

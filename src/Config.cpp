@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:24:04 by gborne            #+#    #+#             */
-/*   Updated: 2022/11/30 03:22:24 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/09 13:51:18 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,9 @@ Config::tokens Config::_tokenizeConfig( void ) const {
 		size_t	len = 0;
 
 		while (str[pos]) {
+			// commentaire (bug si colé)
+			/*if (str[pos] == '#')
+				break;*/
 
 			if (str[pos] == '{' || str[pos] == '}') {
 				tokens.push_back(std::string(1, str[pos]));
@@ -97,12 +100,11 @@ Config::tokens Config::_tokenizeConfig( void ) const {
 
 Config::tokens::iterator Config::_traitServLoc( ConfigServer * server, Config::tokens::iterator it, Config::tokens::iterator ite ) {
 
-	std::string					name;
-	std::vector<std::string>	methods;
-	std::string					index;
-	std::string					root;
-	std::string					php;
-	std::string					cgi;
+	std::string							name;
+	std::vector<std::string>			methods;
+	std::string							index;
+	std::string							root;
+	std::map<std::string, std::string>	cgi;
 
 	if (*(*(++it)).begin() != '/')
 		throw std::invalid_argument("[Config.cpp] expected '/' at 'location' in file \"" + std::string(_path) + "\"");
@@ -135,17 +137,18 @@ Config::tokens::iterator Config::_traitServLoc( ConfigServer * server, Config::t
 				throw std::invalid_argument("[Config.cpp] expected ';' at 'root' in file \"" + std::string(_path) + "\"");
 			root = (*it).substr(0, (*it).length() - 1);
 		}
-		else if (*it == "php") {
-			it++;
-			if (*(*it).rbegin() != ';')
-				throw std::invalid_argument("[Config.cpp] expected ';' at 'php' in file \"" + std::string(_path) + "\"");
-			php = (*it).substr(0, (*it).length() - 1);
-		}
 		else if (*it == "cgi") {
+			std::string	key;
+			std::string	value;
+			it++;
+			if (*(*it).rbegin() != ',')
+				throw std::invalid_argument("[Config.cpp] expected ',' at 'cgi' in file \"" + std::string(_path) + "\"");
+			key = (*it).substr(0, (*it).length() - 1);
 			it++;
 			if (*(*it).rbegin() != ';')
 				throw std::invalid_argument("[Config.cpp] expected ';' at 'cgi' in file \"" + std::string(_path) + "\"");
-			cgi = (*it).substr(0, (*it).length() - 1);
+			value = (*it).substr(0, (*it).length() - 1);
+			cgi.insert(std::make_pair<std::string, std::string>(key, value));
 		}
 		else
 			throw std::invalid_argument("[Config.cpp] unknown argument '" + *it + "' in file \"" + std::string(_path) + "\"");
@@ -153,7 +156,7 @@ Config::tokens::iterator Config::_traitServLoc( ConfigServer * server, Config::t
 	}
 	if (*it != "}")
 		throw std::invalid_argument("[Config.cpp] expected '}' in file \"" + std::string(_path) + "\"");
-	server->addLocation(name, methods, index, root, php, cgi);
+	server->addLocation(name, methods, index, root, cgi);
 	return it;
 }
 

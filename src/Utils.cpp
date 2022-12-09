@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 18:16:41 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/07 20:21:49 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/08 11:54:41 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,11 +62,18 @@ std::string	get_value( const std::string & line ) {
 }
 
 bool	file_exist( const std::string & path ) {
-	if (FILE *file = fopen(path.c_str(), "r")) {
-		fclose(file);
-		return true;
-	} else {
+	std::ifstream	ifs(path.c_str());
+	if (ifs.fail())
 		return false;
+	else {
+		std::string	str;
+		std::getline(ifs, str);
+		ifs.close();
+		// if str is empty, is probably a directory
+		if (str.empty())
+			return false;
+		else
+			return true;
 	}
 }
 

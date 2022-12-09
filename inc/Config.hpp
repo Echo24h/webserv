@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:09:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/05 18:07:00 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/09 13:39:58 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <cstdlib>
 # include <fstream>
 # include <vector>
+# include <map>
 
 class Config {
 
