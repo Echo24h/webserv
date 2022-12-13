@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 16:30:46 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/09 14:06:31 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/11 22:37:27 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,12 @@
 
 int	main( int argc, char **argv ) {
 	if (argc != 2)
-		std::cout << "command: ./webserv [configuration file]" << std::endl;
+		std::cout << "command: ./webserv <config.conf>" << std::endl;
 	else {
 		try {
-			Config config(argv[1]);
+			HTTP::Config config(argv[1]);
 			//std::cout << config << std::endl;
-			Server server(&(*config.begin()));
+			HTTP::Server server(&(*config.begin()));
 			server.run();
 		} catch(const std::exception& e) {
 			std::cerr << e.what() << std::endl;

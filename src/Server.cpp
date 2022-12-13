@@ -6,18 +6,19 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/05 19:21:31 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/13 14:37:40 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
+
+namespace HTTP {
 
 Server::Server( void ) : _config(NULL) {
 	return;
 }
 
 Server::Server( ConfigServer * config ) : _config(config) {
-
 	return ;
 }
 
@@ -33,23 +34,23 @@ Server &	Server::operator=( const Server & rhs ) {
 	return *this;
 }
 
-int	Server::_setup_server() const {
+int	Server::_setup_server( void ) const {
 
 	int server_socket;
 
-	struct sockaddr_in my_addr;    /* Adresse */
+	struct sockaddr_in address;
+	memset(&address, 0, sizeof(address));
 
 	if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		std::cerr << ERROR << "[Server.cpp] socket() : " << strerror(errno) << std::endl;
 		exit(1);
 	}
 
-	my_addr.sin_family = AF_INET;         /* host byte order */
-	my_addr.sin_port = htons(MYPORT);     /* short, network byte order */
-	my_addr.sin_addr.s_addr = INADDR_ANY; /* auto-remplissage avec mon IP */
-	bzero(&(my_addr.sin_zero), 8);        /* zero pour le reste de struct */
+	address.sin_family = AF_INET;
+	address.sin_port = htons(_config->get_port());
+	address.sin_addr.s_addr = inet_addr(_config->get_host().c_str());
 
-	if (bind(server_socket, (struct sockaddr *)&my_addr, sizeof(sockaddr)) == -1) {
+	if (bind(server_socket, (struct sockaddr *)&address, sizeof(sockaddr)) == -1) {
 		std::cerr << ERROR << "[Server.cpp] bind() : " << strerror(errno) << std::endl;
 		exit(1);
 	}
@@ -58,6 +59,8 @@ int	Server::_setup_server() const {
 		std::cerr << ERROR << "[Server.cpp] listen() : " << strerror(errno) << std::endl;
 		exit(1);
 	}
+	std::cerr << SUCCESS << "Server start at adress " << _config->get_host() << ":" << _config->get_port() << std::endl;
+
 	return server_socket;
 }
 
@@ -81,20 +84,20 @@ int	Server::_accept_connection( int server_socket ) const {
 
 void	Server::_handle_connexion( int client_socket ) const {
 
-	HTTP::Request	request = HTTP::Request(client_socket);
+	HTTP::Request	request = Request(_config, client_socket);
 
 	std::cout << RECV << request << std::endl;
 
-	HTTP::Response	response = HTTP::Response(_config, request);
+	HTTP::Response	response = Response(_config, &request);
 
-	std::string	responseStr = response.to_string();
+	std::string	response_string = response.to_string();
 
-	if (responseStr.empty())
+	if (response_string.empty())
 		std::cerr << ERROR << "[Server.cpp] Empty response" << std::endl;
 	else {
 		std::cout << SEND << response << std::endl;
 
-		if (send(client_socket, responseStr.c_str(), responseStr.size(), 0) == -1)
+		if (send(client_socket, response_string.c_str(), response_string.size(), 0) == -1)
 			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
 	}
 	close(client_socket);
@@ -147,3 +150,5 @@ void	Server::run( void ) {
 		}
 	}
 }
+
+} // namespace HTTP

@@ -6,19 +6,21 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:24:04 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/09 13:51:18 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/11 20:55:15 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Config.hpp"
 
-Config::Config( void ) : _path("../conf/default.conf"), _servers(servers()) {
-	_initServers(_tokenizeConfig());
+namespace HTTP {
+
+Config::Config( void ) : _path("../conf/default.conf") {
+	_init_serv(_tokenize());
 	return ;
 }
 
-Config::Config( const char * path ) : _path(path), _servers(servers()) {
-	_initServers(_tokenizeConfig());
+Config::Config( const char * path ) : _path(path) {
+	_init_serv(_tokenize());
 	return ;
 }
 
@@ -53,7 +55,7 @@ Config::const_iterator Config::end( void ) const {
 	return _servers.end();
 }
 
-Config::tokens Config::_tokenizeConfig( void ) const {
+Config::tokens Config::_tokenize( void ) const {
 
 	Config::tokens	tokens;
 
@@ -98,17 +100,13 @@ Config::tokens Config::_tokenizeConfig( void ) const {
 	return tokens;
 }
 
-Config::tokens::iterator Config::_traitServLoc( ConfigServer * server, Config::tokens::iterator it, Config::tokens::iterator ite ) {
+Config::tokens::const_iterator Config::_trait_serv_loc( ConfigServer * server, Config::tokens::const_iterator & it, Config::tokens::const_iterator & ite ) {
 
-	std::string							name;
-	std::vector<std::string>			methods;
-	std::string							index;
-	std::string							root;
-	std::map<std::string, std::string>	cgi;
+	ConfigServer::location	location;
 
 	if (*(*(++it)).begin() != '/')
 		throw std::invalid_argument("[Config.cpp] expected '/' at 'location' in file \"" + std::string(_path) + "\"");
-	name = *it;
+	location.set_name(*it);
 	it++;
 	if (*it != "{")
 		throw std::invalid_argument("[Config.cpp] expected '{' in file \"" + std::string(_path) + "\"");
@@ -118,24 +116,24 @@ Config::tokens::iterator Config::_traitServLoc( ConfigServer * server, Config::t
 		if (*it == "methods") {
 			it++;
 			while (*(*it).rbegin() == ',') {
-				methods.push_back((*it).substr(0, (*it).length() - 1));
+				location.new_method((*it).substr(0, (*it).length() - 1));
 				it++;
 			}
 			if (*(*it).rbegin() != ';')
 				throw std::invalid_argument("[Config.cpp] expected ';' at 'methods' in file \"" + std::string(_path) + "\"");
-			methods.push_back((*it).substr(0, (*it).length() - 1));
+			location.new_method((*it).substr(0, (*it).length() - 1));
 		}
 		else if (*it == "index") {
 			it++;
 			if (*(*it).rbegin() != ';')
 				throw std::invalid_argument("[Config.cpp] expected ';' at 'index' in file \"" + std::string(_path) + "\"");
-			index = (*it).substr(0, (*it).length() - 1);
+			location.set_index((*it).substr(0, (*it).length() - 1));
 		}
 		else if (*it == "root") {
 			it++;
 			if (*(*it).rbegin() != ';')
 				throw std::invalid_argument("[Config.cpp] expected ';' at 'root' in file \"" + std::string(_path) + "\"");
-			root = (*it).substr(0, (*it).length() - 1);
+			location.set_root((*it).substr(0, (*it).length() - 1));
 		}
 		else if (*it == "cgi") {
 			std::string	key;
@@ -148,7 +146,7 @@ Config::tokens::iterator Config::_traitServLoc( ConfigServer * server, Config::t
 			if (*(*it).rbegin() != ';')
 				throw std::invalid_argument("[Config.cpp] expected ';' at 'cgi' in file \"" + std::string(_path) + "\"");
 			value = (*it).substr(0, (*it).length() - 1);
-			cgi.insert(std::make_pair<std::string, std::string>(key, value));
+			location.new_cgi(key, value);
 		}
 		else
 			throw std::invalid_argument("[Config.cpp] unknown argument '" + *it + "' in file \"" + std::string(_path) + "\"");
@@ -156,51 +154,51 @@ Config::tokens::iterator Config::_traitServLoc( ConfigServer * server, Config::t
 	}
 	if (*it != "}")
 		throw std::invalid_argument("[Config.cpp] expected '}' in file \"" + std::string(_path) + "\"");
-	server->addLocation(name, methods, index, root, cgi);
+	server->new_location(location);
 	return it;
 }
 
-Config::tokens::iterator Config::_traitServParam( ConfigServer * server, Config::tokens::iterator it ) {
+Config::tokens::const_iterator Config::_trait_serv_param( ConfigServer * server, Config::tokens::const_iterator & it ) {
 
 	if (*it == "host") {
 		it++;
 		if (*(*it).rbegin() != ';')
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'host' in file \"" + std::string(_path) + "\"");
-		server->setHost((*it).substr(0, (*it).length() - 1));
+		server->set_host((*it).substr(0, (*it).length() - 1));
 	}
 	else if (*it == "port") {
 		it++;
 		if (*(*it).rbegin() != ';')
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'port' in file \"" + std::string(_path) + "\"");
-		server->setPort(atoi((*it).substr(0, (*it).length() - 1).c_str()));
+		server->set_port(atoi((*it).substr(0, (*it).length() - 1).c_str()));
 	}
 	else if (*it == "server_name") {
 		it++;
 		if (*(*it).rbegin() != ';')
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'server_name' in file \"" + std::string(_path) + "\"");
-		server->setServerName((*it).substr(0, (*it).length() - 1));
+		server->set_server_name((*it).substr(0, (*it).length() - 1));
 	}
 	else if (*it == "error") {
 		it++;
 		if (*(*it).rbegin() != ';')
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'error' in file \"" + std::string(_path) + "\"");
-		server->setErrorPath((*it).substr(0, (*it).length() - 1));
+		server->set_error_path((*it).substr(0, (*it).length() - 1));
 	}
 	else if (*it == "body_limit") {
 		it++;
 		if (*(*it).rbegin() != ';')
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'body_limit' in file \"" + std::string(_path) + "\"");
-		server->setBodyLimit(atoi((*it).substr(0, (*it).length() - 1).c_str()));
+		server->set_body_limit(atoi((*it).substr(0, (*it).length() - 1).c_str()));
 	}
 	else
 		throw std::invalid_argument("[Config.cpp] unknown argument '" + *it + "' in file \"" + std::string(_path) + "\"");
 	return it;
 }
 
-void Config::_initServers( Config::tokens tokens ) {
+void Config::_init_serv( const Config::tokens & tokens ) {
 
-	Config::tokens::iterator	it = tokens.begin();
-	Config::tokens::iterator	ite = tokens.end();
+	Config::tokens::const_iterator	it = tokens.begin();
+	Config::tokens::const_iterator	ite = tokens.end();
 
 	while (it != ite) {
 		//std::cout << "<" << *(it++) << ">" << std::endl;
@@ -215,9 +213,9 @@ void Config::_initServers( Config::tokens tokens ) {
 			it++;
 			while (it != ite && *it != "}" && *it != "server") {
 				if (*it == "location")
-					it = _traitServLoc(&server, it, ite);
+					it = _trait_serv_loc(&server, it, ite);
 				else
-					it = _traitServParam(&server, it);
+					it = _trait_serv_param(&server, it);
 				if (it != ite)
 					it++;
 			}
@@ -240,9 +238,12 @@ std::ostream &	operator<<( std::ostream & o, Config const & rhs ) {
 	int i = 1;
 	while (it != ite) {
 		std::cout << "\033[1;33m" << "Server " << i << "\033[0m" << std::endl;
-		std::cout << *it << std::endl;
-		it++;
-		i++;
+		std::cout << *it;
+		it++, i++;
+		if (it != ite)
+			std::cout << std::endl;
 	}
 	return o;
 }
+
+} // namespace HTTP

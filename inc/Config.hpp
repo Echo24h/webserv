@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:09:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/09 13:39:58 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/11 20:52:57 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,15 @@
 # include <cstdlib>
 # include <fstream>
 # include <vector>
-# include <map>
+
+namespace HTTP {
 
 class Config {
 
 public:
 
 	typedef	std::vector<std::string>	tokens;
-	typedef	std::vector<ConfigServer>			servers;
+	typedef	std::vector<ConfigServer>	servers;
 	typedef	servers::iterator			iterator;
 	typedef	servers::const_iterator		const_iterator;
 
@@ -54,10 +55,10 @@ private:
 
 	// Parse Config to Servers functions
 
-	tokens				_tokenizeConfig( void ) const;
-	tokens::iterator	_traitServLoc( ConfigServer * server, tokens::iterator it, tokens::iterator ite );
-	tokens::iterator	_traitServParam( ConfigServer * server, tokens::iterator it );
-	void				_initServers( tokens tokens );
+	tokens					_tokenize( void ) const;
+	tokens::const_iterator	_trait_serv_loc( ConfigServer * server, tokens::const_iterator & it, tokens::const_iterator & ite );
+	tokens::const_iterator	_trait_serv_param( ConfigServer * server, tokens::const_iterator & it );
+	void					_init_serv( const tokens & tokens );
 
 	// Privates members
 
@@ -67,5 +68,7 @@ private:
 };
 
 std::ostream &	operator<<( std::ostream & o, Config const & rhs );
+
+} // namespace HTTP
 
 #endif

@@ -14,9 +14,12 @@
 		<div id="top" class="container">
 			<img src="img/logo.png" alt="Logo Webserv" width="200px" height="200px">
 			<h1>Hello !</h1>
-			<a>
-				<button class="button">Test</button>
-			</a>
+		</div>
+		<div class="container">
+			<form action="upload.php" method="post" enctype="multipart/form-data">
+				<input type="file" name="fileToUpload" id="fileToUpload">
+				<input type="submit" value="Upload Image" name="submit">
+			</form>
 		</div>
 	</div>
 </body>

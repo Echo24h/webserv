@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:18:38 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/05 18:07:32 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/12 18:15:02 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@
 # include <netinet/in.h>
 # include <arpa/inet.h>
 
-#define MYPORT 3490	/* Le port où les utilisateurs se connecteront */
-
 #define BACKLOG 10	/* Nombre maxi de connections acceptées en file */
+
+namespace HTTP {
 
 class Server {
 
@@ -59,5 +59,7 @@ private:
 	ConfigServer *	_config;
 
 };
+
+} // namespace HTTP
 
 #endif

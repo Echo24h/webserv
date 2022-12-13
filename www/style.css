@@ -1,15 +1,4 @@
-:root {
-	--body-color: black;
-	--font-color: #EAEAEA;
-
-	--main-font: 'Montserrat';
-	--second-font: 'Lato';
-}
-
 * {
-	font-family: var(--second-font);
-	scroll-behavior: smooth;
-	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
 }
@@ -21,13 +10,11 @@
 	justify-content: center;
 	width: 100%;
 	height: 100vh;
-	background-color: var(--body-color);
+	background-color: black;;
 }
 
 .container {
 	width: 100%;
-	height: 100vh;
-	margin-top: -30%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -40,7 +27,43 @@ h2,
 h3,
 h4,
 p {
-	font-family: var(--font);
-	color: var(--font-color);
+	font-family: 'Lato';
+	color: #EAEAEA;
 }
 
+form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+form span {
+	display: flex;
+	flex-direction: column;
+}
+
+form label {
+	color: #EAEAEA;
+}
+
+form input {
+	cursor: pointer;
+}
+
+form .button {
+	width: 50%;
+	padding: 10px;
+	font-family: 'Lato';
+	border-radius: 5px;
+	background-color: #EAEAEA;
+	color: black;;
+	border: 2px solid #EAEAEA;
+	transition-duration: 0.4s;
+}
+
+
+.button:hover {
+	background-color: black;;
+	color: #EAEAEA;
+	border-color: #EAEAEA;
+}

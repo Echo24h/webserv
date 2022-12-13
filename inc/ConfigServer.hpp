@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/09 13:36:22 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/12 02:20:26 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,30 +17,28 @@
 
 # include <iostream>
 # include <vector>
-# include <map>
 
-struct Location {
+# include "ConfigLocation.hpp"
+# include "Types.hpp"
 
-	std::string							name;
-	std::vector<std::string>			methods;
-	std::string							index;
-	std::string							root;
-	std::map<std::string, std::string>	cgi;
-};
+namespace HTTP {
 
 class ConfigServer {
 
 public:
 
-	typedef std::vector<Location>			locations;
+	typedef ConfigLocation					location;
+	typedef std::vector<location>			locations;
 	typedef locations::iterator				iterator;
 	typedef locations::const_iterator		const_iterator;
+
+	typedef Types							types;
 
 	// CANONICAL FORM
 
 	ConfigServer( void );
 
-	ConfigServer( std::string host, int port, std::string errorPath );
+	ConfigServer( const std::string & host, const int & port, const std::string & error_path  );
 
 	ConfigServer( ConfigServer const & src );
 
@@ -48,7 +46,7 @@ public:
 
 	ConfigServer &	operator=( ConfigServer const & rhs );
 
-	// ITERATORS
+	// ITERATORS (locations)
 
 	iterator		begin( void );
 
@@ -60,44 +58,50 @@ public:
 
 	// SETTERS
 
-	void	setHost( std::string host );
+	void	set_host( const std::string & host );
 
-	void	setPort( int port );
+	void	set_port( const int & port );
 
-	void	setServerName( std::string serverName );
+	void	set_server_name( const std::string & server_name );
 
-	void	setErrorPath( std::string errorPath );
+	void	set_error_path( const std::string & error_path );
 
-	void	setBodyLimit( int bodyLimit );
+	void	set_body_limit( const int & body_limit );
 
-	void	addLocation( std::string name, std::vector<std::string> methods,
-		std::string index, std::string root, std::map<std::string, std::string>	cgi );
+	void	new_location( const location & location );
 
 	// GETTERS
 
-	std::string	getHost( void ) const;
+	std::string	get_host( void ) const;
 
-	int			getPort( void ) const;
+	int			get_port( void ) const;
 
-	std::string	getServerName( void ) const;
+	std::string	get_server_name( void ) const;
 
-	std::string	getErrorPath( void ) const;
+	std::string	get_error_path( void ) const;
 
-	int			getBodyLimit( void ) const;
+	int			get_body_limit( void ) const;
 
-	locations	getLocations( void ) const;
+	// /!\ if location isn't find, return location without anything set
+	location	get_location( const std::string & virtual_path ) const;
+
+	locations	get_locations( void ) const;
+
+	std::string	get_type( const std::string & extension ) const;
 
 private:
 
 	std::string			_host;
 	int					_port;
-	std::string			_serverName;
-	std::string			_errorPath;
-	int					_bodyLimit;
+	std::string			_server_name;
+	std::string			_error_path;
+	int					_body_limit;
 	locations			_locations;
-
+	types				_types;
 };
 
 std::ostream &	operator<<( std::ostream & o, ConfigServer const & rhs );
+
+} // namespace HTTP
 
 #endif

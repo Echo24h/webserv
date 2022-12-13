@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:35:40 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/05 20:31:25 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/13 14:52:05 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,15 @@
 # include <fstream>
 # include <stdlib.h> // itoa()
 
+# include "CGI.hpp"
+
 namespace HTTP {
 
 enum Code {
 	OK = 200,
 	CREATED = 201,
 	ACCEPTED = 202,
-	NO_CONTENT = 203,
+	NO_CONTENT = 204,
 	BAD_REQUEST = 400,
 	FORBIDDEN = 403,
 	NOT_FOUND = 404,
@@ -42,7 +44,7 @@ public:
 
 	Response( void );
 
-	Response( ConfigServer * config, const Request & request );
+	Response( const ConfigServer * config, const Request * request );
 
 	Response( const Response & src );
 
@@ -50,47 +52,33 @@ public:
 
 	Response & operator=( const Response & rhs );
 
-	std::string	to_string( void ) const;
-
 	// GETTERS
 
-	std::string	file_path( void ) const;
+	int			get_code( void ) const;
 
-	std::string	file_type( void ) const;
+	std::string	get_final_path( void ) const;
 
-	int	code( void ) const;
+	std::string	get_type( void ) const;
+
+	// FUNCTIONS
+
+	std::string	to_string( void ) const;
 
 private:
 
-	// Parsing
+	void		_construct( void );
 
-	void		_serialize( const Request & request );
+	void		_construct_cgi( void );
 
-	std::string	_get_file_path( const std::string & location, const std::string & method ) const;
+	std::string	_construct_content( const std::string & path ) const;
 
-	std::string	_get_file_type( const std::string & file_path ) const;
+	const ConfigServer *	_config;
+	const Request *			_request;
 
-	// Methods
-
-	void	_get( const std::string & location );
-
-	void	_post( const std::string & location );
-
-	void	_del( const std::string & location );
-
-	// to_string()
-
-	std::string	_format( const std::string & path ) const;
-
-	std::string	_content( const std::string & path ) const;
-
-	// Members
-
-	std::string		_file_path;
-	std::string		_file_type;
-	int				_code;
-	ConfigServer *	_config;
-
+	int						_code;
+	std::string				_final_path;
+	std::string				_type;
+	std::string				_content;
 };
 
 std::ostream &	operator<<( std::ostream & o, Response const & rhs );

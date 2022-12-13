@@ -1,0 +1,10 @@
+<?php
+if(unlink($image))
+{
+	header("location:index.php?action=deleted");
+}
+else
+{
+	header("location:index.php?action=deleted_error");
+}
+?>

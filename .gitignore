@@ -1,5 +1,9 @@
 # Exec
 webserv
+client
+
+# Valgrind
+*.dSYM
 
 # Prerequisites
 *.d
@@ -33,3 +37,4 @@ webserv
 *.exe
 *.out
 *.app
+.gitignore
