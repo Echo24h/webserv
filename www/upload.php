@@ -1,49 +1,81 @@
 <?php
+require("session.class.php");
+$session = new Session();
+
 $target_dir = "uploads/";
-$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
-$uploadOk = 1;
-$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
 // Check if image file is a actual image or fake image
 if(isset($_POST["submit"])) {
-	$check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-	if($check !== false) {
-		echo "File is an image - " . $check["mime"] . ".";
-		$uploadOk = 1;
-	} else {
-		echo "File is not an image.";
-		$uploadOk = 0;
-	}
-}
 
-// Check if file already exists
-if (file_exists($target_file)) {
-	echo "Sorry, file already exists.";
-	$uploadOk = 0;
-}
+	$countfiles = count($_FILES["file"]["name"]);
 
-// Check file size
-if ($_FILES["fileToUpload"]["size"] > 500000) {
-	echo "Sorry, your file is too large.";
-	$uploadOk = 0;
-}
+	for($i = 0; $i < $countfiles; $i++) {
 
-// Allow certain file formats
-if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-&& $imageFileType != "gif" ) {
-	echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
-	$uploadOk = 0;
-}
+		$target_file = $target_dir . basename($_FILES["file"]["name"][$i]);
+		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
-// Check if $uploadOk is set to 0 by an error
-if ($uploadOk == 0) {
-	echo "Sorry, your file was not uploaded.";
-// if everything is ok, try to upload file
-} else {
-	if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-		echo "The file ". htmlspecialchars( basename( $_FILES["fileToUpload"]["name"])). " has been uploaded.";
-	} else {
-		echo "Sorry, there was an error uploading your file.";
+		// Check if file is an image
+		$check = getimagesize($_FILES["file"]["tmp_name"][$i]);
+		if($check !== false) {
+
+			// Check if file already exists
+			if (!file_exists($target_file)) {
+
+				// Check file size
+				if ($_FILES["file"]["size"][$i] <= 500000) {
+
+					// Allow certain file formats
+					if($imageFileType == "jpg" || $imageFileType == "png" || $imageFileType == "jpeg"
+					|| $imageFileType == "gif" ) {
+
+						if (move_uploaded_file($_FILES["file"]["tmp_name"][$i], $target_file)) {
+							$session->setFlash("The file ". htmlspecialchars( basename( $_FILES["file"]["name"][$i])). " has been uploaded.", 'info');
+						}
+						else {
+							$session->setFlash("Sorry, there was an error uploading your file.");
+						}
+					}
+					else {
+						$session->setFlash("Sorry, only JPG, JPEG, PNG & GIF files are allowed.");
+					}
+				}
+				else {
+					$session->setFlash("Sorry, your file is too large.");
+				}
+			}
+			else {
+				$session->setFlash("Sorry, file '" . $target_file . "' already exists.");
+			}
+		}
+		else {
+			$session->setFlash("File is not an image.");
+		}
 	}
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WebServ</title>
+
+	<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+	<div id="main">
+		<div class="container">
+			<a href="index.php" class="back"><<</a>
+		</div>
+		<div id="top" class="container">
+			<img src="img/logo.png" alt="Logo Webserv" width="200px" height="200px">
+		</div>
+		<div class="container">
+			<?php $session->flash(); ?>
+		</div>
+	</div>
+</body>
+</html>

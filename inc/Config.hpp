@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:09:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/11 20:52:57 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/18 17:34:02 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,12 @@ class Config {
 
 public:
 
-	typedef	std::vector<std::string>	tokens;
 	typedef	std::vector<ConfigServer>	servers;
+
 	typedef	servers::iterator			iterator;
 	typedef	servers::const_iterator		const_iterator;
+
+	typedef	std::vector<std::string>	tokens;
 
 	// CANONICAL FORM
 

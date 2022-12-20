@@ -6,20 +6,21 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:18:38 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/12 18:15:02 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/18 19:06:30 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "ConfigServer.hpp"
+# include "Config.hpp"
 # include "Request.hpp"
 # include "Response.hpp"
 
 # include <iostream>
 # include <fstream>
 # include <cstdlib>
+# include <map>
 
 # include <unistd.h>
 # include <string.h>
@@ -27,6 +28,7 @@
 # include <sys/socket.h>
 # include <netinet/in.h>
 # include <arpa/inet.h>
+# include <fcntl.h>
 
 #define BACKLOG 10	/* Nombre maxi de connections acceptées en file */
 
@@ -36,9 +38,11 @@ class Server {
 
 public:
 
-	Server( void );
+	typedef	std::map<int, const ConfigServer *>	listens;
 
-	Server( ConfigServer * config );
+	// CANONICAL FORM
+
+	Server( Config * config );
 
 	Server( const Server & src );
 
@@ -46,17 +50,20 @@ public:
 
 	Server &	operator=( const Server & rhs );
 
+	// FUNCTIONS
+
 	void	run( void );
 
 private:
 
-	int		_setup_server() const;
+	void	_setup_server( void );
 
-	int		_accept_connection( int server_socket ) const;
+	int		_accept_connection( const int & server_socket ) const;
 
-	void	_handle_connexion( int client_socket ) const;
+	void	_handle_connexion( const int & client_socket, const ConfigServer * config ) const;
 
-	ConfigServer *	_config;
+	Config *	_config;
+	listens		_listens;
 
 };
 

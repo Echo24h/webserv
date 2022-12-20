@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/13 15:28:34 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 22:48:31 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <vector>
 # include <cstdlib> //free()
 # include <unistd.h> // get_current_dir_name()
+# include <ctype.h> // isdigit()
 
 #define	RED			"\033[1;31m"
 #define	GREEN		"\033[1;32m"
@@ -40,19 +41,42 @@ namespace HTTP {
 # define LINE_END	"\r\n"
 # define BUFF_SIZE	8192
 
+enum Code {
+
+	OK = 200,
+	CREATED = 201,
+	ACCEPTED = 202,
+	NO_CONTENT = 204,
+
+	BAD_REQUEST = 400,
+	FORBIDDEN = 403,
+	NOT_FOUND = 404,
+	METHOD_NOT_ALLOWED = 405,
+	REQUEST_TIMEOUT = 408,
+
+	INTERNAL_SERVER_ERROR = 500,
+	BAD_GATEWAY = 502,
+	SERVICE_UNAVAILABLE = 503,
+	HTTP_VERSION_NOT_SUPPORTED = 505,
+};
+
 std::vector<std::string>	split ( const std::string & str, const std::string & delim = LINE_END );
 
 std::string					itoa( const int & num );
 
+bool						is_number( const std::string & s );
+
 bool						file_exist( const std::string & path );
+
+std::string					get_key( const std::string & line, const std::string & separator = ": ");
+
+std::string					get_value( const std::string & line, const std::string & separator = ": ");
 
 std::string					get_extension( const std::string & real_path );
 
 std::string					get_current_dir( void );
 
-std::string					html_header( void );
-
-std::string					html_footer( void );
+std::string					read_file( const std::string & path );
 
 } // namespace HTTP
 

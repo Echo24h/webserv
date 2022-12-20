@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/12 02:20:26 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 22:39:39 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ public:
 
 	void	set_error_path( const std::string & error_path );
 
-	void	set_body_limit( const int & body_limit );
+	void	set_body_limit( const std::string & body_limit );
 
 	void	new_location( const location & location );
 
@@ -88,6 +88,8 @@ public:
 	locations	get_locations( void ) const;
 
 	std::string	get_type( const std::string & extension ) const;
+
+	std::string	get_real_path( const std::string & virtual_path ) const;
 
 private:
 

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:35:40 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/13 14:52:05 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 22:17:48 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,29 +20,14 @@
 # include <fstream>
 # include <stdlib.h> // itoa()
 
+# include "Utils.hpp"
 # include "CGI.hpp"
 
 namespace HTTP {
 
-enum Code {
-	OK = 200,
-	CREATED = 201,
-	ACCEPTED = 202,
-	NO_CONTENT = 204,
-	BAD_REQUEST = 400,
-	FORBIDDEN = 403,
-	NOT_FOUND = 404,
-	REQUEST_TIMEOUT = 408,
-	INTERNAL_SERVER_ERROR = 500,
-	BAD_GATEWAY = 502,
-	SERVICE_UNAVAILABLE = 503,
-};
-
 class Response {
 
 public:
-
-	Response( void );
 
 	Response( const ConfigServer * config, const Request * request );
 
@@ -70,7 +55,9 @@ private:
 
 	void		_construct_cgi( void );
 
-	std::string	_construct_content( const std::string & path ) const;
+	void		_construct_error( const int & code, const std::string & msg = std::string() );
+
+	void		_construct_delete( void );
 
 	const ConfigServer *	_config;
 	const Request *			_request;

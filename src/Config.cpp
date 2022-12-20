@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:24:04 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/11 20:55:15 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 22:39:24 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ Config::tokens::const_iterator Config::_trait_serv_param( ConfigServer * server,
 		it++;
 		if (*(*it).rbegin() != ';')
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'body_limit' in file \"" + std::string(_path) + "\"");
-		server->set_body_limit(atoi((*it).substr(0, (*it).length() - 1).c_str()));
+		server->set_body_limit((*it).substr(0, (*it).length() - 1));
 	}
 	else
 		throw std::invalid_argument("[Config.cpp] unknown argument '" + *it + "' in file \"" + std::string(_path) + "\"");

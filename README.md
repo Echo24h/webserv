@@ -20,3 +20,4 @@ https://fr.wikipedia.org/wiki/Variables_d%27environnement_CGI
 Autres:
 
 https://github.com/nginx/nginx/blob/master/conf/mime.types
+https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP

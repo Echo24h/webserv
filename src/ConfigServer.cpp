@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/12 18:37:17 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 23:09:20 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,10 +93,24 @@ void	ConfigServer::set_error_path( const std::string & error_path ) {
 	return ;
 }
 
-void	ConfigServer::set_body_limit( const int & body_limit ) {
-	if (body_limit < 1)
-		throw std::invalid_argument("[ConfigServer.cpp] body must be larger than 1px");
-	_body_limit = body_limit;
+void	ConfigServer::set_body_limit( const std::string & body_limit ) {
+
+	char		extension = *body_limit.rbegin();
+	std::string	num = body_limit.substr(0, body_limit.size() - 1);
+
+	if (num.empty() || !is_number(num))
+		throw std::invalid_argument("[ConfigServer.cpp] wrong body_limit");
+
+	if (extension == 'M')
+		_body_limit = atoi(num.c_str()) * 1000000;
+	else if (extension == 'K')
+		_body_limit = atoi(num.c_str()) * 1000;
+	else
+		throw std::invalid_argument("[ConfigServer.cpp] inknow body_limit type");
+
+	if (_body_limit < 2)
+		throw std::invalid_argument("[ConfigServer.cpp] body must be larger than 1Ko");
+	std::cout << _body_limit << std::endl;
 	return ;
 }
 
@@ -138,6 +152,35 @@ ConfigServer::locations	ConfigServer::get_locations( void ) const { return _loca
 
 std::string	ConfigServer::get_type( const std::string & extension ) const {
 	return _types.get_type(extension);
+}
+
+std::string	ConfigServer::get_real_path( const std::string & virtual_path ) const {
+
+	// secure "../" access
+	if (virtual_path.find("..") == (size_t)-1) {
+
+		ConfigServer::location	location = get_location(virtual_path);
+
+		if (!location.get_name().empty()) {
+
+			std::string location_name = location.get_name();
+			size_t	start = location_name.size();
+			if (start > 1)
+				start++;
+
+			std::string path = virtual_path.substr(start, virtual_path.size() - start);
+
+			std::string location_root = location.get_root();
+			std::string locaiton_index = location.get_index();
+
+			if (file_exist(location_root + path))
+				return location_root + path;
+			else if (location_name.size() == virtual_path.size() && file_exist(location_root + locaiton_index))
+				return location_root + locaiton_index;
+			return std::string();
+		}
+	}
+	return std::string();
 }
 
 // STREAM

@@ -6,19 +6,13 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/13 15:58:25 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 23:17:58 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Response.hpp"
 
 namespace HTTP {
-
-Response::Response( void ) {
-	std::cerr << WARNING << "[Response.cpp] Response() : empty response are construct" << std::endl;
-	_construct();
-	return ;
-}
 
 Response::Response( const ConfigServer * config, const Request * request ) : _config(config), _request(request), _code(HTTP::OK) {
 	_construct();
@@ -64,78 +58,83 @@ std::string	Response::to_string( void ) const {
 	std::string			response;
 
 	ss << "HTTP/1.1 " << itoa(_code) << "\r\n";
-	ss << "Content-Type: " << _type << "\r\n";
-	ss << "Content-Length: " << _content.size() << "\r\n";
-	ss << "Connection: keep-alive\r\n\r\n";
-	ss << _content << "\r\n";
-
+	if (_request->get_method() != "DELETE") {
+		ss << "Content-Type: " << _type << "\r\n";
+		ss << "Content-Length: " << _content.size() << "\r\n";
+		ss << "Connection: keep-alive\r\n\r\n";
+		ss << _content << "\r\n";
+	}
 	response = ss.str();
 
 	return response;
 }
 
-std::string Response::_construct_content( const std::string & path ) const {
+void	Response::_construct_error( const int & code, const std::string & msg ) {
+	_code = code;
+	_final_path = _config->get_error_path() + "*";
+	_content += read_file(_config->get_error_path() + "header.html");
 
-	std::string		str;
-	std::ifstream	ifs(path.c_str());
-
-	std::string		content;
-
-	if (ifs.fail())
-		std::cerr << ERROR << "[Response.cpp] _content() : file " << path << " not found" << std::endl;
-	else {
-		while (std::getline(ifs, str))
-			content += str += '\n';
-		ifs.close();
+	_content += "<h1 id=\"error\">Error ";
+	_content += itoa(_code);
+	_content += "</h1>\n";
+	if (!msg.empty()) {
+		_content += "<p>";
+		_content += msg;
+		_content += "</p><br>\n";
 	}
-	return content;
+	_content += "<p>";
+	_content += "<i>WebServ by gborne</i>";
+	_content += "</p>\n";
+	_content += read_file(_config->get_error_path() + "footer.html");
+	_type = _config->get_type("html");
+	return ;
 }
 
 void	Response::_construct_cgi( void ) {
 
-	_final_path = _request->get_real_path();
-	if (_final_path.empty()) {
-		std::cerr << ERROR << "[Response.cpp] _construct() : empty path" << std::endl;
-		_code = HTTP::NOT_FOUND;
-		_final_path = _config->get_error_path() + itoa(_code) + ".html";
-		_content = _construct_content(_final_path);
-		_type = _config->get_type(get_extension(_final_path));
-	}
-	else {
-		CGI	cgi(_config, _request);
-		_code = cgi.get_code();
+	CGI	cgi(_config, _request);
+
+	_code = cgi.get_code();
+
+	if (_code < 400) {
 		_content = cgi.get_content();
 		_type = cgi.get_type();
+	}
+	else {
+		_construct_error(_code, cgi.get_content());
+	}
+}
+
+void	Response::_construct_delete( void ) {
+	if (remove(_final_path.c_str()) == 0) {
+		_code = HTTP::NO_CONTENT;
+	}
+	else {
+		_construct_error(HTTP::INTERNAL_SERVER_ERROR);
 	}
 }
 
 void	Response::_construct( void ) {
 
-	std::string	method = _request->get_method();
+	_final_path = _request->get_real_path();
+	_type = _config->get_type(get_extension(_final_path));
 
 	if (_request->get_version() != "HTTP/1.1")
-		std::cerr << ERROR << "[Response.cpp] _construct() : version \"" << _request->get_version() << "\" isn't supported" << std::endl;
-	else if (!_request->get_cgi().empty()) {
+		_construct_error(HTTP::HTTP_VERSION_NOT_SUPPORTED);
+	else if (_request->get_method().empty())
+		_construct_error(HTTP::METHOD_NOT_ALLOWED);
+	else if (_final_path.empty())
+		_construct_error(HTTP::NOT_FOUND);
+	else if (_request->get_method() == "DELETE")
+		_construct_delete();
+	else if (_request->is_cgi())
 		_construct_cgi();
-	}
-	else if (!method.empty()) {
+	else if (_type.empty())
+		_construct_error(HTTP::NOT_FOUND);
+	else {
 		_code = HTTP::OK;
-		_final_path = _request->get_real_path();
-		if (_final_path.empty()) {
-			std::cerr << ERROR << "[Response.cpp] _construct() : empty path" << std::endl;
-			_code = HTTP::NOT_FOUND;
-			_final_path = _config->get_error_path() + itoa(_code) + ".html";
-		}
-		_type = _config->get_type(get_extension(_final_path));
-		if (_type.empty()) {
-			std::cerr << ERROR << "[Response.cpp] _construct() : empty type" << std::endl;
-			_code = HTTP::NOT_FOUND;
-			_final_path = _config->get_error_path() + itoa(_code) + ".html";
-		}
-		_content = _construct_content(_final_path);
+		_content = read_file(_final_path);
 	}
-	else
-		std::cerr << ERROR << "[Response.cpp] _construct() : Wrong method \"" << method << "\"" << std::endl;
 	return ;
 }
 

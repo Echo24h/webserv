@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 13:17:05 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/13 15:48:38 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/17 17:43:44 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,6 @@ namespace HTTP {
 class CGI {
 
 public:
-
-	CGI( void );
 
 	CGI( const ConfigServer * config, const Request * request );
 

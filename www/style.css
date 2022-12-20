@@ -10,7 +10,7 @@
 	justify-content: center;
 	width: 100%;
 	height: 100vh;
-	background-color: black;;
+	background-color: #2A303D;;
 }
 
 .container {
@@ -19,51 +19,136 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	padding: 20px;
+	margin: 20px;
 }
 
 h1,
 h2,
 h3,
 h4,
+button,
+a,
 p {
-	font-family: 'Lato';
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	color: #EAEAEA;
 }
 
-form {
+form{
+	width: 500px;
+	height: 200px;
+	border: 4px dashed #EAEAEA;
+}
+
+form .text{
+	margin-top: -200px;
+	width: 100%;
+	height: 100%;
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
 	align-items: center;
+	color: #EAEAEA;
+}
+form input{
+	cursor: pointer;
+	height: 100%;
+	width: 100%;
+	outline: none;
+	opacity: 0;
+}
+form button {
+	cursor: pointer;
+	color: #EAEAEA;
+	background: #16a085;
+	border: none;
+	width: 508px;
+	height: 35px;
+	margin-top: 20px;
+	margin-left: -4px;
+	border-radius: 4px;
+	border-bottom: 4px solid #117A60;
+	transition: all .2s ease;
+	outline: none;
+
 }
 
-form span {
+form button:hover{
+	background: #149174;
+	color: #0C5645;
+}
+form button:active{
+	border:0;
+}
+
+.alert {
+	width:400px;
+	border: 1px solid;
+	border-radius: 5px;
+	padding:10px;
+	margin: 10px;
+	color: grey;
+}
+.alert-error {
+	border-color: #d32f2f;
+	background-color: #ef5350;
+	color: #EAEAEA;
+}
+.alert-alert {
+	border-color: #ef6c00;
+	background-color: #ff9800;
+	color: #EAEAEA;
+}
+
+.alert-info{
+	border-color: #0288d1;
+	background-color: #29b6f6;
+	color: #EAEAEA;
+}
+.alert p {
+	text-align: center;
+}
+
+a {
+	text-decoration: none;
+	display: inline-block;
+	padding: 8px 16px;
+	border-radius: 5px;
+	margin-right: 5px;
+	transition: all .2s ease;
+}
+
+a:hover {
+	background-color: #EAEAEA;
+	color: black;
+}
+
+.back {
+	background-color: #EAEAEA;
+	border-radius: 5px;
+	color: black;
+	transition: all .2s ease;
+}
+
+.back:hover {
+	background-color: black;
+	color: #EAEAEA;
+}
+
+.list {
 	display: flex;
 	flex-direction: column;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	height: 200px;
+	width: 600px;
+
 }
 
-form label {
-	color: #EAEAEA;
+.list .element {
+	display: flex;
+	justify-content:baseline;
+	align-items: center;
+	width: 200px;
 }
 
-form input {
-	cursor: pointer;
-}
-
-form .button {
-	width: 50%;
-	padding: 10px;
-	font-family: 'Lato';
-	border-radius: 5px;
-	background-color: #EAEAEA;
-	color: black;;
-	border: 2px solid #EAEAEA;
-	transition-duration: 0.4s;
-}
-
-
-.button:hover {
-	background-color: black;;
-	color: #EAEAEA;
-	border-color: #EAEAEA;
-}

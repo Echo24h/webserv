@@ -9,6 +9,28 @@
 </head>
 <body>
 	<div id="main">
+		<div class="list">
+		<?php
+			if ($handle = opendir('uploads')) {
+
+				while (false !== ($entry = readdir($handle))) {
+
+					if ($entry != "." && $entry != "..") {
+					?>
+						<div class="element">
+							<a href="delete.php?delete=<?php echo $entry ?>">
+								<img src="img/trash.svg" alt="corbeille" class="trash" width="20px" height="20px" >
+							</a>
+							<p><?php echo $entry; ?></p>
+						</div>
+					<?php
+					}
+				}
+
+				closedir($handle);
+			}
+		?>
+		</div>
 		<div id="top" class="container">
 			<img src="img/logo.png" alt="Logo Webserv" width="200px" height="200px">
 		</div>
@@ -21,6 +43,8 @@
 				</div>
 				<button type="submit" name="submit">Upload</button>
 			</form>
+		</div>
+		<div class="container">
 		</div>
 	</div>
 </body>

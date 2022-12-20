@@ -6,15 +6,13 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/13 17:32:08 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 23:14:30 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/CGI.hpp"
 
 namespace HTTP {
-
-CGI::CGI( void ) : _config(NULL), _request(NULL) { return ; }
 
 CGI::CGI( const ConfigServer * config, const Request * request ) : _config(config), _request(request), _code(200) {
 	_construct();
@@ -49,29 +47,41 @@ std::string	CGI::get_content( void ) const {
 
 void	CGI::_construct( void ) {
 
-	std::cout << "ici" << std::endl;
-
 	std::string	cgi_response = _exec();
 
-	std::cout << "ici" << std::endl;
-
-	if (_code < 500) {
+	if (_code < 400) {
 		size_t	delim = cgi_response.find("\r\n\r\n");
-		_type = cgi_response.substr(14, delim - 14);
+		std::vector<std::string>	tokens = split(cgi_response.substr(0, delim));
+		std::map<std::string, std::string>	header;
+
+		std::vector<std::string>::iterator	it = tokens.begin();
+		std::vector<std::string>::iterator	ite = tokens.end();
+
+		while (it != ite) {
+			header.insert(std::make_pair(get_key(*it), get_value(*it)));
+			it++;
+		}
+		_type = header["Content-type"];
 		_content = cgi_response.substr(delim + 4, cgi_response.size() - (delim + 4));
 	}
-	else {
-		_type = _config->get_type("html");
-		_content += html_header();
-		_content += "<h3 id=\"error\">Server internal error</h3>\n";
-		_content += "<p>";
-		_content += cgi_response;
-		_content += "</p>\n";
-		_content += html_footer();
-	}
+	else
+		_content = cgi_response;
 }
 
 std::string	CGI::_exec( void ) {
+
+	if (_request->get_method() == "POST"
+	&& itoa(_request->get_content().size()) != _request->get_ressource("Content-Length")) {
+		_code = HTTP::BAD_GATEWAY;
+		return "Losing data in file content";
+	}
+	else if (int(_request->get_content().size()) > _config->get_body_limit()) {
+		_code = HTTP::BAD_GATEWAY;
+		return "Request size too long";
+	}
+
+	std::cout << "req_content=" << itoa(_request->get_content().size()) << std::endl;
+	std::cout << "org_content=" << _request->get_ressource("Content-Length") << std::endl;
 
 	char ** env = _generate_env();
 
@@ -87,12 +97,12 @@ std::string	CGI::_exec( void ) {
 	int	fd_err[2];
 
 	if (pipe(fd) == -1)
-		std::cerr << ERROR << "[CGI.cpp] pipe() : can't create new pipe" << std::endl;
+		_code = HTTP::INTERNAL_SERVER_ERROR;
 	else {
 		if (pipe(fd_err) == -1) {
-			std::cerr << ERROR << "[CGI.cpp] pipe() : can't create new pipe" << std::endl;
-			close(fd_err[0]);
-			close(fd_err[1]);
+			close(fd[0]);
+			close(fd[1]);
+			_code = HTTP::INTERNAL_SERVER_ERROR;
 		}
 		else {
 			int	pid = fork();
@@ -102,53 +112,54 @@ std::string	CGI::_exec( void ) {
 				close(fd[1]);
 				close(fd_err[0]);
 				close(fd_err[1]);
-				std::cerr << ERROR << "[CGI.cpp] exec() : can't create new process" << std::endl;
+				_code = HTTP::INTERNAL_SERVER_ERROR;
 			}
 			else {
 				if (pid == 0) {
-					close(fd[0]);
 					close(fd_err[0]);
+					dup2(fd[0], 0);
 					dup2(fd[1], 1);
 					dup2(fd_err[1], 2);
+					close(fd[0]);
 					close(fd[1]);
 					close(fd_err[1]);
 					if (execve(arg[0], arg, env) == -1)
-						write(1, "KO\n", 4);
-					std::cout << "ERROR" << std::endl;
-					exit(0);
+						std::cerr << "CGI process fail" << std::endl;
+					exit(1);
 				}
 				else {
-					std::cout << "ici4" << std::endl;
-					if (waitpid(pid, &_code, 0) == -1) {
+					int status;
+
+					//if request want to upload file
+					std::string	req_content = _request->get_content();
+					if (!req_content.empty())
+						write(fd[1], req_content.c_str(), req_content.size());
+
+					if (waitpid(pid, &status, 0) == -1) {
 						close(fd[0]);
 						close(fd[1]);
 						close(fd_err[0]);
 						close(fd_err[1]);
-						std::cerr << ERROR << "[CGI.cpp] exec() : execve process fail" << std::endl;
-						_code = 500;
+						_code = HTTP::INTERNAL_SERVER_ERROR;
 					}
 					else {
-						std::cout << _code << std::endl;
-						if (_code == 0) {
-							_code = 200;
+						if (status == 0) {
+							_code = HTTP::OK;
 							close(fd_err[0]);
 							close(fd_err[1]);
 							close(fd[1]);
-							std::cout << "ici3" << std::endl;
 							cgi_response = _read(fd[0]);
-							std::cout << "ici3" << std::endl;
+							if (cgi_response.empty())
+								_code = HTTP::INTERNAL_SERVER_ERROR;
 							//std::cout << cgi_response << std::endl;
 							close(fd[0]);
 						}
 						else {
-							_code = 500;
+							_code = HTTP::INTERNAL_SERVER_ERROR;;
 							close(fd[0]);
 							close(fd[1]);
 							close(fd_err[1]);
-							std::cout << "ici2" << std::endl;
 							cgi_response = _read(fd_err[0]);
-							std::cout << "ici2" << std::endl;
-							//std::cout << cgi_response << std::endl;
 							close(fd_err[0]);
 						}
 					}
@@ -176,16 +187,15 @@ std::string	CGI::_read( const int & fd ) const {
 
 	while((bytes_read = read(fd, buffer, BUFF_SIZE)) != 0) {
 		if (bytes_read == (ssize_t)-1) {
-			std::cerr << ERROR << "[CGI.cpp] _recv() : read error" << std::endl;
 			return std::string();
 		}
-		buffer[bytes_read] = '\0';
-		ss << buffer;
+		std::string	string(buffer, bytes_read);
+		ss << string;
 	}
 	return ss.str();
 }
 
-char **	CGI::_generate_env( void  ) const {
+char **	CGI::_generate_env( void ) const {
 
 	std::map<std::string, std::string> env;
 
@@ -203,17 +213,16 @@ char **	CGI::_generate_env( void  ) const {
 	env["PATH_INFO"] = get_current_dir() + _request->get_real_path();
 	env["PATH_TRANSLATED"] = _request->get_real_path();
 	env["SCRIPT_NAME"] = _request->get_cgi();
-	//env["SCRIPT_FILENAME"] = "cgi/php-cgi-ubuntu";
+	//env["SCRIPT_FILENAME"] = _request->get_cgi();
 	env["QUERY_STRING"] = _request->get_query(); // var1=val1&var2=val2&...
+	std::cout <<  _request->get_query() << std::endl;
 	//env["REMOTE_HOST"] = "";
 	env["REMOTE_ADDR"] = _request->get_client_ip();
 	//env["AUTH_TYPE"] = "";
 	//env["REMOTE_USER"] = "";
 	//env["REMOTE_IDENT"] = "";
 	if (_request->get_method() == "POST") {
-		//std::cout << _request->get_ressource("Content-Type") << std::endl;
 		env["CONTENT_TYPE"] = _request->get_ressource("Content-Type");
-		//env["CONTENT_TYPE"] = "image/png";
 		env["CONTENT_LENGTH"] = _request->get_ressource("Content-Length");
 	}
 

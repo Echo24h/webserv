@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 00:10:36 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/12 02:10:00 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 18:46:47 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include <string.h>
 
 # include "ConfigServer.hpp"
+# include "Utils.hpp"
 
 namespace HTTP {
 
@@ -32,8 +33,6 @@ class Request {
 public:
 
 	typedef	std::map<std::string, std::string>	ressources;
-
-	Request( void );
 
 	Request( const ConfigServer * config, const int & client_socket );
 
@@ -53,6 +52,8 @@ public:
 
 	std::string	get_cgi( void ) const;
 
+	bool		is_cgi( void ) const;
+
 	std::string	get_query( void ) const;
 
 	std::string	get_client_ip( void ) const;
@@ -61,15 +62,11 @@ public:
 
 	std::string	get_ressource( const std::string & key ) const ;
 
+	std::string	get_content( void ) const;
+
 private:
 
-	std::string	_to_string( const int & client_socket ) const;
-
-	std::string	_get_key( const std::string & line ) const;
-
-	std::string	_get_value( const std::string & line ) const;
-
-	std::string	_get_real_path( const std::string & virtual_path, const std::string & method ) const;
+	std::string	_read( const int & client_socket ) const;
 
 	void		_construct_header( const std::string & line );
 
@@ -83,6 +80,7 @@ private:
 	std::string	_client_ip;
 	std::string	_version;
 	ressources	_ressources;
+	std::string	_content;
 
 	const ConfigServer * _config;
 

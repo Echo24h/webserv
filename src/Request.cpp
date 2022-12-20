@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/13 17:06:33 by gborne           ###   ########.fr       */
+/*   Updated: 2022/12/20 23:21:37 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,9 @@
 
 namespace HTTP {
 
-Request::Request( void ) {
-	std::cerr << WARNING << "[Request.cpp] Request() : empty request are construct" << std::endl;
-	return ;
-}
-
 Request::Request( const ConfigServer * config, const int & client_socket ) : _config(config) {
-	std::string buff = _to_string(client_socket);
-	std::cout << buff << std::endl;
+	std::string buff = _read(client_socket);
+	//std::cout << buff << std::endl;
 	_construct(buff);
 	return ;
 }
@@ -66,6 +61,10 @@ std::string	Request::get_cgi( void ) const {
 	return _cgi;
 }
 
+bool		Request::is_cgi( void ) const {
+	return !_cgi.empty();
+}
+
 std::string	Request::get_query( void ) const {
 	return _query;
 }
@@ -87,98 +86,46 @@ std::string	Request::get_ressource( const std::string & key ) const {
 	return it->second;
 }
 
+std::string	Request::get_content( void ) const {
+	return _content;
+}
+
 // FUNCTIONS
 
-std::string	Request::_to_string( const int & client_socket ) const {
+std::string	Request::_read( const int & client_socket ) const {
 
-	char	buffer[BUFF_SIZE];
-	ssize_t	bytes_read = 0;
+	char				buffer[BUFF_SIZE];
+	ssize_t				bytes_read;
+	int					total_bytes = 0;
+	std::stringstream	ss;
 
-	bytes_read = recv(client_socket, buffer, BUFF_SIZE, 0);
-	if (bytes_read <= 0)
-		std::cerr << ERROR << "[Request.cpp] recv() : " << strerror(errno) << std::endl;
-
-	buffer[bytes_read] = '\0';
-
-	return std::string(buffer);
-}
-
-std::string	Request::_get_key( const std::string & line ) const {
-
-	std::string	key;
-	size_t		n;
-
-	n = line.find(':');
-	if (n > 0)
-		key = line.substr(0, n);
-	return key;
-}
-
-std::string	Request::_get_value( const std::string & line ) const {
-
-	std::string	value;
-	size_t		n;
-
-	n = line.find(": ");
-	if (n > 0)
-		value = line.substr(n + 2, line.size() - (n + 2));
-	return value;
-}
-
-std::string	Request::_get_real_path( const std::string & virtual_path, const std::string & method ) const {
-
-	// secure "../" access
-	if (virtual_path.find("..") == (size_t)-1) {
-
-		ConfigServer::location	location = _config->get_location(virtual_path);
-
-		if (location.get_name().empty())
-			std::cerr << ERROR << "[Request.cpp] _get_real_path() : location " << virtual_path << " not found" << std::endl;
-		else {
-
-			std::string location_name = location.get_name();
-			size_t	start = location_name.size();
-			if (start > 1)
-				start++;
-
-			std::string path = virtual_path.substr(start, virtual_path.size() - start);
-
-			if (location.is_method(method)) {
-
-				std::string location_root = location.get_root();
-				std::string locaiton_index = location.get_index();
-
-				if (file_exist(location_root + path))
-					return location_root + path;
-				else if (location_name.size() == virtual_path.size() && file_exist(location_root + locaiton_index))
-					return location_root + locaiton_index;
-				else
-					std::cerr << ERROR << "[Request.cpp] _get_real_path() : can't found " << location_root + path << std::endl;
-				return std::string();
-			}
-			else
-				std::cerr << ERROR << "[Request.cpp] _get_real_path() : can't found method " << method << std::endl;
+	while((bytes_read = recv(client_socket, buffer, BUFF_SIZE, 0)) > 0) {
+		total_bytes += int(bytes_read);
+		if (bytes_read == (ssize_t)-1 || total_bytes >= _config->get_body_limit()) {
+			break;
 		}
+		std::string	string(buffer, bytes_read);
+		ss << string;
+		// For secure losing data;
+		usleep(1000);
 	}
-	return std::string();
+	return ss.str();
 }
 
 void	Request::_construct_header( const std::string & line ) {
 
 	std::vector<std::string> tokens = split(line, " ");
 
-	if (tokens.size() != 3)
-		std::cerr << ERROR << "[Request.cpp] _construct_header() : wrong format" << std::endl;
-	else {
+	if (tokens.size() == 3) {
 		_method = tokens[0];
 		if (_method == "GET" && tokens[1].find('?') != (size_t)-1) {
 			_query = tokens[1].substr(tokens[1].find('?') + 1, tokens[1].size() - tokens[1].find('?') - 1);
 			_virtual_path = tokens[1].substr(0, tokens[1].find('?'));
-			_real_path = _get_real_path(_virtual_path, _method);
+			_real_path = _config->get_real_path(_virtual_path);
 		}
 		else {
 			_virtual_path = tokens[1];
-			_real_path = _get_real_path(_virtual_path, _method);
+			_real_path = _config->get_real_path(_virtual_path);
 		}
 		_version = tokens[2];
 
@@ -186,44 +133,65 @@ void	Request::_construct_header( const std::string & line ) {
 	}
 }
 
+std::vector<std::string>	split_req( const std::string & buff ) {
+
+	std::vector<std::string>	request;
+
+	size_t	delim = buff.find("\r\n\r\n");
+
+	request.push_back(buff.substr(0, delim));
+
+	request.push_back(buff.substr(delim + 4, buff.size() - (delim + 4)));
+
+	return request;
+}
+
 void	Request::_construct( const std::string & buff ) {
+
+	if (buff.empty())
+		return ;
 
 	std::map<std::string, std::string> tokens;
 
 	std::string			key;
 	std::string			value;
 
-	std::vector<std::string> lines = split(buff);
+	// separate body and header of request
+	std::vector<std::string> request = split_req(buff);
 
-	std::vector<std::string>::iterator	it = lines.begin();
-	std::vector<std::string>::iterator	ite = lines.end();
+	if (request.size() > 0) {
 
-	if (it != ite) {
+		if (request.size() > 1)
+			_content = request.at(1);
 
-		// construct header
-		_construct_header(*it);
-		it++;
+		std::vector<std::string> lines = split(request.at(0));
 
-		// construct other lines
-		while(it != ite) {
+		std::vector<std::string>::iterator	it = lines.begin();
+		std::vector<std::string>::iterator	ite = lines.end();
 
-			if (!it->empty() && it->find(':') != (size_t)-1) {
+		if (it != ite) {
 
-				key = _get_key(*it);
-				value = _get_value(*it);
-				if (key.empty() || value.empty())
-					std::cerr << ERROR << "[Request.cpp] _construct() : wrong format" << std::endl;
-				else
-					_ressources.insert(std::make_pair(key, value));
-			}
-			else if (_method == "POST") {
-				_query = *it;
-			}
+			// construct header
+			_construct_header(*it);
 			it++;
+
+			// construct other lines
+			while(it != ite) {
+
+				if (!it->empty() && it->find(": ") != (size_t)-1) {
+
+					key = get_key(*it, ": ");
+					value = get_value(*it, ": ");
+					if (!key.empty() & !value.empty())
+						_ressources.insert(std::make_pair(key, value));
+				}
+				else if (_method == "POST") {
+					_query = *it;
+				}
+				it++;
+			}
 		}
 	}
-	else
-		std::cerr << ERROR << "[Request.cpp] _construct() : empty request" << std::endl;
 }
 
 std::ostream &	operator<<( std::ostream & o, Request const & rhs ) {
