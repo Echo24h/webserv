@@ -1,5 +1,52 @@
 ![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
 
+Utilisation :
+```
+make
+./webserv <config.conf>
+```
+
+Exemple d'un fichier config:
+```
+server {
+	host			localhost;
+	port			3490;
+	server_name		default;
+	error			err/;
+	body_limit		10K;
+
+	location / {
+		methods 	GET, POST, DELETE;
+		index		index.html;
+		root		www/;
+		cgi			.php, cgi/php-cgi-ubuntu;
+	}
+
+	location /data {
+		methods 	GET, POST, DELETE;
+		index		index.html;
+		root		test/;
+		cgi			.php, cgi/php-cgi-ubuntu;
+	}
+}
+
+server {
+	host			localhost;
+	port			3491;
+	server_name		bis;
+	error			err/;
+	body_limit		50K;
+
+	location / {
+		methods 	GET;
+		index		index.html;
+		root		www/;
+		cgi			.php, cgi/php-cgi-ubuntu;
+	}
+}
+```
+
+
 ## Ressources
 ***
 Ressources utilisées dans ce projet:
