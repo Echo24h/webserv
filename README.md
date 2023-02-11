@@ -4,6 +4,13 @@ make
 ./webserv <config.conf>
 ```
 
+methods:
+```
+GET
+POST
+DELETE
+```
+
 ![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
 
 Exemple d'un fichier config:
