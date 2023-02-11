@@ -1,10 +1,10 @@
-![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
-
 Utilisation :
 ```
 make
 ./webserv <config.conf>
 ```
+
+![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
 
 Exemple d'un fichier config:
 ```
@@ -46,11 +46,8 @@ server {
 }
 ```
 
-
 ## Ressources
 ***
-Ressources utilisées dans ce projet:
-
 * [Variables d'environnement CGI](https://fr.wikipedia.org/wiki/Variables_d%27environnement_CGI)
 * [mime.types](https://github.com/nginx/nginx/blob/master/conf/mime.types)
 * [Liste des codes HTTP](https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP)
