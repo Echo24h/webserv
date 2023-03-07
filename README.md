@@ -1,14 +1,4 @@
-Utilisation :
-```
-make
-./webserv <config.conf>
-```
-
-Test:
-```
-./stress <nb_de_requettes>
-./request <test/file.txt>
-```
+RESSOURCES:
 
 methods:
 ```
@@ -19,14 +9,7 @@ DELETE
 
 ![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
 
-Exemple d'un fichier config:
-```
-server {
-	host			localhost;
-	port			3490;
-	server_name		default;
-	error			err/;
-	body_limit		10M;
+Utilisation des sockets:
 
 	location / {
 		methods 	GET, POST, DELETE;
