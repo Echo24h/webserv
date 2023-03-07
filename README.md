@@ -6,7 +6,7 @@ make
 
 Test:
 ```
-./stress <nb_de_requettes>
+./stress <nb_of_request>
 ./request <test/file.txt>
 ```
 
