@@ -6,7 +6,7 @@
 #    By: gborne <gborne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/27 16:29:59 by gborne            #+#    #+#              #
-#    Updated: 2022/12/12 16:34:41 by gborne           ###   ########.fr        #
+#    Updated: 2023/03/07 20:40:16 by gborne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,12 +39,15 @@ all:			$(NAME)
 
 $(NAME):		$(OBJS)
 				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+				$(CXX) -o request test/Request.cpp -lcurl
+				$(CXX) -o stress test/Stress.cpp
 
 clean:
 				$(RM) $(OBJS)
 
 fclean:			clean
 				$(RM) $(NAME)
+				rm request stress
 
 re:				fclean $(NAME)
 

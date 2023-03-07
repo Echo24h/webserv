@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/20 23:09:20 by gborne           ###   ########.fr       */
+/*   Updated: 2023/02/11 17:02:37 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ void	ConfigServer::set_body_limit( const std::string & body_limit ) {
 
 	if (_body_limit < 2)
 		throw std::invalid_argument("[ConfigServer.cpp] body must be larger than 1Ko");
-	std::cout << _body_limit << std::endl;
+	//std::cout << _body_limit << std::endl;
 	return ;
 }
 

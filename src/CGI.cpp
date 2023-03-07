@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/20 23:14:30 by gborne           ###   ########.fr       */
+/*   Updated: 2023/02/11 17:03:28 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,8 @@ std::string	CGI::_exec( void ) {
 		return "Request size too long";
 	}
 
-	std::cout << "req_content=" << itoa(_request->get_content().size()) << std::endl;
-	std::cout << "org_content=" << _request->get_ressource("Content-Length") << std::endl;
+	//std::cout << "req_content=" << itoa(_request->get_content().size()) << std::endl;
+	//std::cout << "org_content=" << _request->get_ressource("Content-Length") << std::endl;
 
 	char ** env = _generate_env();
 
@@ -215,7 +215,7 @@ char **	CGI::_generate_env( void ) const {
 	env["SCRIPT_NAME"] = _request->get_cgi();
 	//env["SCRIPT_FILENAME"] = _request->get_cgi();
 	env["QUERY_STRING"] = _request->get_query(); // var1=val1&var2=val2&...
-	std::cout <<  _request->get_query() << std::endl;
+	//std::cout <<  _request->get_query() << std::endl;
 	//env["REMOTE_HOST"] = "";
 	env["REMOTE_ADDR"] = _request->get_client_ip();
 	//env["AUTH_TYPE"] = "";
