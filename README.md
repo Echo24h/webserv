@@ -4,7 +4,7 @@ make
 ./webserv <config.conf>
 ```
 
-Test:
+Test: (le serveur doit être allumé en local)
 ```
 ./stress <nb_of_request>
 ./request <test/file.txt>
