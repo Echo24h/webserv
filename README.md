@@ -1,6 +1,12 @@
 Utilisation :
-```
+```Makefile
+# Compile et supprime les fichiers du projet
 make
+make clean
+make fclean
+make re
+
+# Lance le serveur, un exemple de fichier config est ci-dessous
 ./webserv <config.conf>
 ```
 
@@ -23,7 +29,7 @@ DELETE
 ![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
 
 Exemple d'un fichier config:
-```
+```config
 server {
 	host			localhost;
 	port			3490;
