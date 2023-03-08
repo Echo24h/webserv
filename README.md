@@ -21,7 +21,7 @@ http://localhost:3490
 # nb = 50 envoie 50 requetes POST, nb = 1 par défaut
 ./request <test/post.txt> <nb>
 ```
-D'autres requetes HTTP sont présentents au format `.txt` dans le dossiers 'test/`pour examples
+D'autres requetes HTTP sont présentents au format `.txt` dans le dossiers `test/`pour examples
 
 ## Methodes:
 ```
