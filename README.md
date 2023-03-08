@@ -3,13 +3,17 @@
   <img height="250" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_home.png" alt="Page web prédéfinie Webserv"/>
 </p>
 
+# Serveur HTTP en C++98 inspiré de NGINX
+
+Webserv est un serveur HTTP écrit en C++98 inspiré de NGINX. Le serveur prend en charge les méthodes HTTP GET, POST et DELETE et peut être configuré pour gérer plusieurs connexions simultanément. 
+
 ## Utilisation:
 
-Compile le projet
+Pour utiliser Webserv, il vous suffit de compiler le projet en exécutant la commande suivante :
 ```
 make
 ```
-Démarre le serveur (le fichier config est présenté ci-dessous)
+Vous pouvez ensuite démarrer le serveur en exécutant la commande suivante, en remplaçant `<config.conf>` par le chemin vers le fichier de configuration de votre serveur :
 ```
 ./webserv <config.conf>
 ```
@@ -21,19 +25,15 @@ http://localhost:3490
 
 ## Test:
 
-Un mini programme est disponible pour __envoyer des requetes__ au serveur:
-```
-./request <content.txt> <nb>
-```
-Pour envoyer `50` requetes `POST` à l'adresse `localhost:3490`, j'éxécute cette commande:
-
-*nb = 1 par défaut*
+Webserv est livré avec un mini programme pour envoyer des requêtes au serveur. Vous pouvez l'utiliser pour tester le fonctionnement du serveur en envoyant plusieurs requêtes POST à l'adresse `localhost:3490`. Voici comment l'utiliser :
 ```
 ./request test/post.txt 50
 ```
-D'autres requetes HTTP au format `.txt` sont dans le dossier `test/`pour exemples
+Ceci enverra 50 requêtes POST à l'adresse `localhost:3490`. Vous pouvez également utiliser d'autres fichiers de requêtes HTTP au format `.txt` qui se trouvent dans le dossier `test/`. 
 
 ## Methodes:
+
+Webserv prend en charge les méthodes HTTP suivantes :
 ```
 GET
 POST
@@ -41,9 +41,10 @@ DELETE
 ```
 
 ## Config:
-__(ATTENTION: Supprimez les commentaire si Copier/Coller)__
 
-Les fichiers `.conf` sont présent dans le dossier `conf/`par défaut
+La configuration de Webserv se fait via des fichiers `.conf`, qui sont stockés dans le dossier `conf/` par défaut. Vous pouvez configurer l'adresse et le port du serveur, le nom du serveur, le dossier contenant les pages d'erreur, la taille maximale du corps de requête et les routes disponibles.
+
+Voici un exemple de fichier de configuration :
 
 ```cnf
 server {
