@@ -1,74 +1,76 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <curl/curl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <cstring>
+#include <unistd.h>
 
-int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " filename" << std::endl;
+int request(char **argv) {
+
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        std::cerr << "Erreur lors de la création de la socket" << std::endl;
         return 1;
     }
 
-    std::ifstream input(argv[1]);
-    if (!input) {
-        std::cerr << "Cannot open file " << argv[1] << std::endl;
+    struct sockaddr_in serv_addr;
+    memset(&serv_addr, '0', sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(3490); // Port HTTP par défaut
+
+    // Adresse IP ou nom de domaine du serveur cible
+    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
+        std::cerr << "Adresse invalide ou non supportée" << std::endl;
         return 1;
     }
 
-    CURL *curl;
-    CURLcode res;
-    std::string response;
-
-    // Vérification de la valeur de retour de curl_easy_init
-    curl = curl_easy_init();
-    if (!curl) {
-        std::cerr << "Erreur lors de l'initialisation de curl" << std::endl;
+    // Connexion au serveur
+    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+        std::cerr << "Erreur lors de la connexion au serveur" << std::endl;
         return 1;
     }
 
-    // Vérification de la valeur de retour de curl_global_init
-    CURLcode res_init = curl_global_init(CURL_GLOBAL_ALL);
-    if (res_init != CURLE_OK) {
-        std::cerr << "Erreur lors de l'initialisation globale de curl : " << curl_easy_strerror(res_init) << std::endl;
+    // Lecture de la requête DELETE à partir du fichier delete.txt
+    std::ifstream infile(argv[1]);
+    std::string request;
+    std::string line;
+    while (std::getline(infile, line)) {
+        request += line + "\r\n";
+    }
+    infile.close();
+
+    // Envoi de la requête
+    if (send(sockfd, request.c_str(), request.size(), 0) != request.size()) {
+        std::cerr << "Erreur lors de l'envoi de la requête" << std::endl;
         return 1;
     }
 
-    if(curl) {
-        std::string method, url;
-        input >> method >> url;
+    // Fermeture de la connexion
+    close(sockfd);
 
-        // Vérification de la valeur de retour de curl_easy_setopt
-        CURLcode res_setopt = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str());
-        if (res_setopt != CURLE_OK) {
-            std::cerr << "Erreur lors de la configuration de l'option CURLOPT_CUSTOMREQUEST : " << curl_easy_strerror(res_setopt) << std::endl;
-            return 1;
+    return 0;
+}
+
+int main(int argc, char **argv) {
+
+    if (argc != 2 && argc != 3) {
+        std::cerr << "Usage : ./request <request_file.txt>" << std::endl;
+        std::cerr << "        ./request <request_file.txt> <nb_of_of_request>" << std::endl;
+        return 1;
+    }
+    else {
+
+        int nb_of_request = 1;
+
+        if (argc == 3)
+            nb_of_request = atoi(argv[2]);
+
+        while (nb_of_request > 0) {
+            if (request(argv) != 0)
+                return 1;
+            nb_of_request--;
         }
-
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
-        // Définit une fonction de rappel pour stocker la réponse du serveur HTTP
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, [curl](char *ptr, size_t size, size_t nmemb, std::string *userdata) -> size_t {
-            char *escaped_ptr = curl_easy_escape(curl, ptr, size * nmemb);
-            if (escaped_ptr == NULL) {
-                return 0;
-            }
-            userdata->append(escaped_ptr);
-            curl_free(escaped_ptr);
-            return size * nmemb;
-        });
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-
-        // Vérification de la valeur de retour de curl_easy_perform
-        CURLcode res_perform = curl_easy_perform(curl);
-
-        if(res_perform != CURLE_OK)
-            std::cerr << "Erreur lors de l'envoi de la requête : " << curl_easy_strerror(res) << std::endl;
-        else
-            std::cout << "Réponse du serveur : " << response << std::endl;
-
-        curl_easy_cleanup(curl);
     }
-
-    curl_global_cleanup();
     return 0;
 }

@@ -1,38 +1,44 @@
-Utilisation :
-```
+## Utilisation:
+```Makefile
+# Compile le projet
 make
+make re
+make clean
+make fclean
+# Démarre le serveur (le fichier config est présenté ci-dessous)
 ./webserv <config.conf>
 ```
 
-Test:
-```
-./stress <nb_de_requettes>
-./request <test/file.txt>
+## Test:
+```Makefile
+# Pour envoyé une requette au serveur à l'adress localhost:3490
+# nb_request = 1 si non défini
+./request <test/request_file.txt> <nb_request>
 ```
 
-methods:
+## Methodes:
 ```
 GET
 POST
 DELETE
 ```
 
-![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
-
-Exemple d'un fichier config:
-```
+## Config:
+__(ATTENTOIN supprimez les commentaire si Copier/Coller)__
+```conf
 server {
-	host			localhost;
-	port			3490;
-	server_name		default;
-	error			err/;
-	body_limit		10M;
+	host			localhost;	// Adresse du serveur
+	port			3490;		// Port ouvert du serveur
+	server_name		default;	// Nom du serveur
+	error			err/;		// Dossier contenant le template error
+	body_limit		10M;		// Taille MAX du corp de requete
 
-	location / {
-		methods 	GET, POST, DELETE;
-		index		index.html;
-		root		www/;
-		cgi			.php, cgi/php-cgi-ubuntu;
+
+	location / {				// Définie une route
+		methods 	GET, POST, DELETE;	// Méthodes permises
+		index		index.html;			// Index
+		root		www/;				// Root
+		cgi			.php, cgi/php-cgi-ubuntu;	// L'extension du cgi et son chemin
 	}
 
 	location /data {
@@ -58,6 +64,8 @@ server {
 	}
 }
 ```
+
+![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
 
 ## Ressources
 ***
