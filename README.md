@@ -1,6 +1,6 @@
 <p align="center" display="flex" >
-  <img height="250" src="https://github.com/gborneGit/webserv/blob/main/webserv_logs.png" alt="Logs console Webserv"/>
-  <img height="250" src="https://github.com/gborneGit/webserv/blob/main/webserv_home.png" alt="Page web prédéfinie Webserv"/>
+  <img height="250" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_logs.png" alt="Logs console Webserv"/>
+  <img height="250" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_home.png" alt="Page web prédéfinie Webserv"/>
 </p>
 
 ## Utilisation:
