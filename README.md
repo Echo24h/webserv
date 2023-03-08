@@ -7,7 +7,7 @@ make
 Test: (le serveur doit être allumé en local)
 ```
 ./stress <nb_of_request>
-./request <test/file.txt>
+./request <test/request.txt>
 ```
 
 methods:
