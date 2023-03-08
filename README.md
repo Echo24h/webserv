@@ -1,5 +1,6 @@
-<p align="center">
-  <img width=250 src="https://github.com/gborneGit/webserv/blob/main/webserv_logs.png" alt="Logs Console Webserv"/>
+<p align="center" display="flex" >
+  <img height="250" src="https://github.com/gborneGit/webserv/blob/main/webserv_logs.png" alt="Logs console Webserv"/>
+  <img height="250" src="https://github.com/gborneGit/webserv/blob/main/webserv_home.png" alt="Page web prédéfinie Webserv"/>
 </p>
 
 ## Utilisation:
@@ -47,27 +48,9 @@ server {
 		methods 	GET, POST, DELETE;
 		index		index.html;
 		root		test/;
-		cgi			.php, cgi/php-cgi-ubuntu;
-	}
-}
-
-server {
-	host			localhost;
-	port			3491;
-	server_name		bis;
-	error			err/;
-	body_limit		50K;
-
-	location / {
-		methods 	GET;
-		index		index.html;
-		root		www/;
-		cgi			.php, cgi/php-cgi-ubuntu;
 	}
 }
 ```
-
-![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
 
 ## Ressources
 ***
