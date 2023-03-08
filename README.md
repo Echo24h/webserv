@@ -7,6 +7,7 @@
 ```Makefile
 # Compile le projet
 make
+
 # Démarre le serveur (le fichier config est présenté ci-dessous)
 ./webserv <config.conf>
 
@@ -17,7 +18,7 @@ http://localhost:3490
 ## Test:
 ```Makefile
 # Pour envoyé une requette POST à l'adresse localhost:3490
-# nb = 50 envoie 50 requetes POST, nb =1 par défaut
+# nb = 50 envoie 50 requetes POST, nb = 1 par défaut
 ./request <test/post.txt> <nb>
 ```
 D'autres requetes HTTP sont présentents au format `.txt` dans le dossiers 'test/`pour examples
