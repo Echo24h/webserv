@@ -21,11 +21,12 @@ http://localhost:3490
 
 ## Test:
 
-Un mini programme est disponible pour envoyer des requetes test au serveur web:
+Un mini programme est disponible pour __envoyer des requetes__ au serveur:
 ```
 ./request <content.txt> <nb>
 ```
-Pour envoyé 50 requetes POST à l'adresse localhost:3490 j'éxécute cette commande:
+Pour envoyer `50` requetes `POST` à l'adresse `localhost:3490`, j'éxécute cette commande:
+
 *nb = 1 par défaut*
 ```
 ./request test/post.txt 50
@@ -41,6 +42,7 @@ DELETE
 
 ## Config:
 __(ATTENTION: Supprimez les commentaire si Copier/Coller)__
+
 Les fichiers `.conf` sont présent dans le dossier `conf/`par défaut
 
 ```cnf
