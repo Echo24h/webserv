@@ -4,24 +4,33 @@
 </p>
 
 ## Utilisation:
-```Makefile
-# Compile le projet
+
+Compile le projet
+```
 make
-
-# Démarre le serveur (le fichier config est présenté ci-dessous)
+```
+Démarre le serveur (le fichier config est présenté ci-dessous)
+```
 ./webserv <config.conf>
+```
 
-# Pour une config host=localhost & port=3490 entrez cette adresse dans le navigateur:
+Pour une config host=localhost & port=3490 entrez cette adresse dans le navigateur
+```
 http://localhost:3490
 ```
 
 ## Test:
-```Makefile
-# Pour envoyé une requette POST à l'adresse localhost:3490
-# nb = 50 envoie 50 requetes POST, nb = 1 par défaut
-./request <test/post.txt> <nb>
+
+Un mini programme est disponible pour envoyer des requetes test au serveur web:
 ```
-D'autres requetes HTTP au format `.txt` sont dans le dossier `test/`pour examples
+./request <content.txt> <nb>
+```
+Pour envoyé 50 requetes POST à l'adresse localhost:3490 j'éxécute cette commande:
+*nb = 1 par défaut*
+```
+./request test/post.txt 50
+```
+D'autres requetes HTTP au format `.txt` sont dans le dossier `test/`pour exemples
 
 ## Methodes:
 ```
