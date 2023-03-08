@@ -23,23 +23,6 @@ Pour une config host=localhost & port=3490 entrez cette adresse dans le navigate
 http://localhost:3490
 ```
 
-## Test:
-
-Webserv est livré avec un mini programme pour envoyer des requêtes au serveur. Vous pouvez l'utiliser pour tester le fonctionnement du serveur en envoyant plusieurs requêtes POST à l'adresse `localhost:3490`. Voici comment l'utiliser :
-```
-./request test/post.txt 50
-```
-Ceci enverra 50 requêtes POST à l'adresse `localhost:3490`. Vous pouvez également utiliser d'autres fichiers de requêtes HTTP au format `.txt` qui se trouvent dans le dossier `test/`. 
-
-## Methodes:
-
-Webserv prend en charge les méthodes HTTP suivantes :
-```
-GET
-POST
-DELETE
-```
-
 ## Config:
 
 La configuration de Webserv se fait via des fichiers `.conf`, qui sont stockés dans le dossier `conf/` par défaut. Vous pouvez configurer l'adresse et le port du serveur, le nom du serveur, le dossier contenant les pages d'erreur, la taille maximale du corps de requête et les routes disponibles.
@@ -68,6 +51,23 @@ server {
 		root		test/;
 	}
 }
+```
+
+## Test:
+
+Webserv est livré avec un mini programme pour envoyer des requêtes au serveur. Vous pouvez l'utiliser pour tester le fonctionnement du serveur en envoyant plusieurs requêtes POST à l'adresse `localhost:3490`. Voici comment l'utiliser :
+```
+./request test/post.txt 50
+```
+Ceci enverra 50 requêtes POST à l'adresse `localhost:3490`. Vous pouvez également utiliser d'autres fichiers de requêtes HTTP au format `.txt` qui se trouvent dans le dossier `test/`. 
+
+## Methodes:
+
+Webserv prend en charge les méthodes HTTP suivantes :
+```
+GET
+POST
+DELETE
 ```
 
 ## Ressources
