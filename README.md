@@ -1,3 +1,7 @@
+<p align="center">
+  <img width=250 src="https://github.com/gborneGit/webserv/blob/main/webserv_logs.png" alt="Logs Console Webserv"/>
+</p>
+
 ## Utilisation:
 ```Makefile
 # Compile le projet
