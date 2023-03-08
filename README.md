@@ -24,7 +24,7 @@ DELETE
 ```
 
 ## Config:
-__(ATTENTOIN supprimez les commentaire si Copier/Coller)__
+__(ATTENTION supprimez les commentaire si Copier/Coller)__
 
 ```cnf
 server {
