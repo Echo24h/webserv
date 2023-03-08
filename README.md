@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Utilisation:
 ```Makefile
 # Compile le projet
@@ -14,6 +15,27 @@ make fclean
 # Pour envoyé une requette au serveur à l'adress localhost:3490
 # nb_request = 1 si non défini
 ./request <test/request_file.txt> <nb_request>
+=======
+Utilisation :
+```Makefile
+# Compile et supprime les fichiers du projet
+make
+make clean
+make fclean
+make re
+
+# Lance le serveur, un exemple de fichier config est ci-dessous
+./webserv <config.conf>
+```
+
+Test: (le serveur doit être allumé en local)
+```Makefile
+# Envoie plusieurs requetes pour stress test le serveur
+./stress <nb_of_request>
+
+# Envoie une requete issus d'un fichier text (voir test/post.txt ou test/get.txt)
+./request <test/request.txt>
+>>>>>>> f8131edb00609190f8490f847617e6767ad5d05e
 ```
 
 ## Methodes:
@@ -23,9 +45,16 @@ POST
 DELETE
 ```
 
+<<<<<<< HEAD
 ## Config:
 __(ATTENTOIN supprimez les commentaire si Copier/Coller)__
 ```conf
+=======
+![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
+
+Exemple d'un fichier config:
+```config
+>>>>>>> f8131edb00609190f8490f847617e6767ad5d05e
 server {
 	host			localhost;	// Adresse du serveur
 	port			3490;		// Port ouvert du serveur
