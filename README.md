@@ -2,18 +2,15 @@
 ```Makefile
 # Compile le projet
 make
-make re
-make clean
-make fclean
 # Démarre le serveur (le fichier config est présenté ci-dessous)
 ./webserv <config.conf>
 ```
 
 ## Test:
 ```Makefile
-# Pour envoyé une requette au serveur à l'adress localhost:3490
-# nb_request = 1 si non défini
-./request <test/request_file.txt> <nb_request>
+# Pour envoyé une requette POST au serveur à l'adresse localhost:3490
+# nb__of_request = 1 si non défini
+./request <test/post.txt> <nb_of_request>
 ```
 
 ## Methodes:
