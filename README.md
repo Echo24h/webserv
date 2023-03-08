@@ -9,14 +9,18 @@
 make
 # Démarre le serveur (le fichier config est présenté ci-dessous)
 ./webserv <config.conf>
+
+# Pour une config host=localhost & port=3490 entrez cette adresse dans le navigateur:
+http://localhost:3490
 ```
 
 ## Test:
 ```Makefile
-# Pour envoyé une requette POST au serveur à l'adresse localhost:3490
-# nb__of_request = 1 si non défini
-./request <test/post.txt> <nb_of_request>
+# Pour envoyé une requette POST à l'adresse localhost:3490
+# nb = 50 envoie 50 requetes POST, nb =1 par défaut
+./request <test/post.txt> <nb>
 ```
+D'autres requetes HTTP sont présentents au format `.txt` dans le dossiers 'test/`pour examples
 
 ## Methodes:
 ```
