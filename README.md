@@ -5,10 +5,11 @@ make
 ```
 
 Test: (le serveur doit être allumé en local)
-```C
-// Envoie plusieurs requetes pour stress test le serveur
+```Makefile
+# Envoie plusieurs requetes pour stress test le serveur
 ./stress <nb_of_request>
-// Envoie une requete issus d'un fichier text (voir test/post.txt ou test/get.txt)
+
+# Envoie une requete issus d'un fichier text (voir test/post.txt ou test/get.txt)
 ./request <test/request.txt>
 ```
 
