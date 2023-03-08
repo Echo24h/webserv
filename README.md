@@ -31,7 +31,8 @@ DELETE
 ```
 
 ## Config:
-__(ATTENTION supprimez les commentaire si Copier/Coller)__
+__(ATTENTION: Supprimez les commentaire si Copier/Coller)__
+Les fichiers `.conf` sont présent dans le dossier `conf/`par défaut
 
 ```cnf
 server {
