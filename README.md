@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+
 ## Utilisation:
 ```Makefile
 # Compile le projet
@@ -16,7 +17,7 @@ make fclean
 # nb_request = 1 si non défini
 ./request <test/request_file.txt> <nb_request>
 =======
-Utilisation :
+## Utilisation :
 ```Makefile
 # Compile et supprime les fichiers du projet
 make
@@ -48,13 +49,8 @@ DELETE
 <<<<<<< HEAD
 ## Config:
 __(ATTENTOIN supprimez les commentaire si Copier/Coller)__
-```conf
-=======
-![alt text](https://github.com/gborneGit/webserv/blob/main/webserv_logs.png)
 
-Exemple d'un fichier config:
 ```config
->>>>>>> f8131edb00609190f8490f847617e6767ad5d05e
 server {
 	host			localhost;	// Adresse du serveur
 	port			3490;		// Port ouvert du serveur
