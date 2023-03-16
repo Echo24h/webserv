@@ -1,6 +1,6 @@
 <p align="center" display="flex" >
   <img height="250" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_logs.png" alt="Logs console Webserv"/>
-  <img height="250" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_new_home.png" alt="Page web prédéfinie Webserv"/>
+  <img height="350" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_new_home.png" alt="Page web prédéfinie Webserv"/>
 </p>
 
 # Serveur HTTP en C++98 inspiré de NGINX
