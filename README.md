@@ -1,11 +1,19 @@
 <p align="center" display="flex" >
   <img height="250" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_logs.png" alt="Logs console Webserv"/>
-  <img height="250" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_home.png" alt="Page web prédéfinie Webserv"/>
+  <img height="250" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_new_home.png" alt="Page web prédéfinie Webserv"/>
 </p>
 
 # Serveur HTTP en C++98 inspiré de NGINX
 
 Webserv est un serveur HTTP écrit en C++98 inspiré de NGINX. Le serveur prend en charge les méthodes HTTP GET, POST et DELETE et peut être configuré pour gérer plusieurs connexions simultanément.
+
+En plus des fonctionnalités mentionnées, Webserv prend également en charge les cookies, l'upload de fichiers et les CGI.
+
+Les cookies sont des fichiers texte stockés sur le navigateur du client qui permettent au serveur de stocker des informations sur l'utilisateur et de maintenir l'état de la session. Webserv prend en charge la création, l'envoi et la réception de cookies via des en-têtes HTTP.
+
+L'upload de fichiers permet aux utilisateurs de télécharger des fichiers sur le serveur. Webserv prend en charge cette fonctionnalité en permettant la configuration de la taille maximale des fichiers téléchargés et en stockant les fichiers téléchargés dans un répertoire spécifié.
+
+Les CGI (Common Gateway Interface) sont des programmes exécutables par le serveur qui permettent de générer des pages web dynamiques. Webserv prend en charge l'exécution de scripts CGI en configurant les paramètres d'exécution appropriés et en redirigeant la sortie générée vers le client via une réponse HTTP.
 
 ## Utilisation:
 
