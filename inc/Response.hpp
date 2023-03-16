@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:35:40 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/20 22:17:48 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/16 01:52:14 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ public:
 	std::string	to_string( void ) const;
 
 private:
+
+	std::string	_set_cookie( void );
 
 	void		_construct( void );
 

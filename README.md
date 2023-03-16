@@ -5,7 +5,7 @@
 
 # Serveur HTTP en C++98 inspiré de NGINX
 
-Webserv est un serveur HTTP écrit en C++98 inspiré de NGINX. Le serveur prend en charge les méthodes HTTP GET, POST et DELETE et peut être configuré pour gérer plusieurs connexions simultanément. 
+Webserv est un serveur HTTP écrit en C++98 inspiré de NGINX. Le serveur prend en charge les méthodes HTTP GET, POST et DELETE et peut être configuré pour gérer plusieurs connexions simultanément.
 
 ## Utilisation:
 
@@ -29,20 +29,20 @@ La configuration de Webserv se fait via des fichiers `.conf`, qui sont stockés 
 
 Voici un exemple de fichier de configuration :
 
-```cnf
+```bash
 server {
-	host			localhost;	// Adresse du serveur
-	port			3490;		// Port ouvert du serveur
-	server_name		default;	// Nom du serveur
-	error			err/;		// Dossier contenant le template error
-	body_limit		10M;		// Taille MAX du corp de requete
+	host			localhost;	# Adresse du serveur
+	port			3490;		# Port ouvert du serveur
+	server_name		default;	# Nom du serveur
+	error			err/;		# Dossier contenant le template error
+	body_limit		10M;		# Taille MAX du corp de requete
 
-
-	location / {				// Définie une route
-		methods 	GET, POST, DELETE;	// Méthodes permises
-		index		index.html;			// Index
-		root		www/;				// Root
-		cgi			.php, cgi/php-cgi-ubuntu;	// L'extension du cgi et son chemin
+	# Définie une route
+	location / {
+		methods 	GET, POST, DELETE;	# Méthodes permises
+		index		index.html;			# Index
+		root		www/;				# Root
+		cgi			.php, cgi/php-cgi-ubuntu;	# L'extension du cgi et son chemin
 	}
 
 	location /data {
@@ -50,6 +50,7 @@ server {
 		index		index.html;
 		root		test/;
 	}
+}
 }
 ```
 
@@ -59,7 +60,7 @@ Webserv est livré avec un mini programme pour envoyer des requêtes au serveur.
 ```
 ./request test/post.txt 50
 ```
-Ceci enverra 50 requêtes POST à l'adresse `localhost:3490`. Vous pouvez également utiliser d'autres fichiers de requêtes HTTP au format `.txt` qui se trouvent dans le dossier `test/`. 
+Ceci enverra 50 requêtes POST à l'adresse `localhost:3490`. Vous pouvez également utiliser d'autres fichiers de requêtes HTTP au format `.txt` qui se trouvent dans le dossier `test/`.
 
 ## Methodes:
 

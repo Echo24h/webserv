@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/18 18:51:53 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/16 01:05:54 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,24 +42,19 @@ void	Server::_setup_server( void ) {
 		struct sockaddr_in address;
 		memset(&address, 0, sizeof(address));
 
-		if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-			std::cerr << ERROR << "[Server.cpp] socket() : " << strerror(errno) << std::endl;
-			exit(1);
-		}
+		if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+			throw std::runtime_error("[Server.cpp] socket() : " + std::string(strerror(errno)));
 
 		address.sin_family = AF_INET;
 		address.sin_port = htons(it->get_port());
 		address.sin_addr.s_addr = inet_addr(it->get_host().c_str());
 
-		if (bind(server_socket, (struct sockaddr *)&address, sizeof(sockaddr)) == -1) {
-			std::cerr << ERROR << "[Server.cpp] bind() : " << strerror(errno) << std::endl;
-			exit(1);
-		}
+		if (bind(server_socket, (struct sockaddr *)&address, sizeof(sockaddr)) == -1)
+			throw std::runtime_error("[Server.cpp] bind() : " + std::string(strerror(errno)));
 
-		if (listen(server_socket, BACKLOG) == -1) {
-			std::cerr << ERROR << "[Server.cpp] listen() : " << strerror(errno) << std::endl;
-			exit(1);
-		}
+		if (listen(server_socket, BACKLOG) == -1)
+			throw std::runtime_error("[Server.cpp] listen() : " + std::string(strerror(errno)));
+
 		std::cout << SUCCESS << "Listening enabled on address [" << it->get_host() << ":" << it->get_port() << "]" << std::endl;
 
 		_listens.insert(std::make_pair(server_socket, &(*it)));
@@ -68,10 +63,8 @@ void	Server::_setup_server( void ) {
 	}
 	if (_listens.size() > 0)
 		std::cout << SUCCESS << "Server start" << std::endl;
-	else {
-		std::cerr << ERROR << "[Server.cpp] _setup_server() : no socket listening" << std::endl;
-		exit(1);
-	}
+	else
+		throw std::runtime_error("[Server.cpp] _setup_server() : no socket listening");
 
 }
 
@@ -147,10 +140,8 @@ void	Server::run( void ) {
 		//because select is destructor
 		ready_sockets = current_sockets;
 
-		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, NULL) < 0) {
-			std::cerr << ERROR << "[Server.cpp] select() : " << strerror(errno) << std::endl;
-			exit(0);
-		}
+		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, NULL) < 0)
+			throw std::runtime_error("[Server.cpp] select() : " + std::string(strerror(errno)));
 
 		for (int i = 0; i <= max_socket_so_far; i++) {
 			if (FD_ISSET(i, &ready_sockets)) {

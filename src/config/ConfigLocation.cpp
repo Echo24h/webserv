@@ -6,11 +6,11 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/11 19:37:23 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/12 16:59:38 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/15 20:54:40 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/ConfigLocation.hpp"
+#include "../../inc/ConfigLocation.hpp"
 
 namespace HTTP {
 
@@ -35,7 +35,13 @@ ConfigLocation &	ConfigLocation::operator=( const ConfigLocation & rhs ) {
 
 void	ConfigLocation::set_name( const std::string & name ) { _name = name; return ; }
 
-void	ConfigLocation::new_method( const std::string & method ) { _methods.push_back(method); return ; }
+void	ConfigLocation::new_method( const std::string & method ) {
+
+	if (method != "DELETE" && method != "POST" && method != "GET")
+		throw std::invalid_argument("[ConfigLocation.cpp] invalid method '" + method + "' in config file");
+	_methods.push_back(method);
+	return ;
+}
 
 void	ConfigLocation::set_index( const std::string & index ) { _index = index; return ; }
 

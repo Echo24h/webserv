@@ -6,11 +6,11 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2023/02/11 17:02:37 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/16 02:12:06 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/ConfigServer.hpp"
+#include "../../inc/ConfigServer.hpp"
 
 namespace HTTP {
 
@@ -66,7 +66,7 @@ ConfigServer::const_iterator ConfigServer::end( void ) const {
 
 void	ConfigServer::set_host( const std::string & host ) {
 	if (host.empty())
-		throw std::invalid_argument(std::string("[ConfigServer.cpp] host is empty").c_str());
+		throw std::invalid_argument("[ConfigServer.cpp] host is empty");
 	if (_host == "localhost")
 		_host = "127.0.0.1";
 	else
@@ -120,6 +120,8 @@ void	ConfigServer::new_location( const ConfigServer::location & location ) {
 }
 
 // GETTERS
+
+//ConfigServer::cookies *	ConfigServer::get_cookies( void ) const { return _cookies; }
 
 std::string				ConfigServer::get_host( void ) const { return _host; }
 

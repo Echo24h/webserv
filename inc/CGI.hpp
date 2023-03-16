@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 13:17:05 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/17 17:43:44 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/15 21:57:53 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 # include "Utils.hpp"
 
 namespace HTTP {
+
+#define ERROR_EXEC_COUNT 30 // 1 = 0.1s, 10 = 1.0s
 
 class CGI {
 

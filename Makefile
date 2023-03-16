@@ -6,54 +6,47 @@
 #    By: gborne <gborne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/27 16:29:59 by gborne            #+#    #+#              #
-#    Updated: 2023/03/08 20:42:35 by gborne           ###   ########.fr        #
+#    Updated: 2023/03/15 20:43:28 by gborne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SRCS			=	main.cpp \
-					src/Config.cpp \
-					src/ConfigServer.cpp \
-					src/ConfigLocation.cpp \
-					src/Response.cpp \
-					src/Request.cpp \
-					src/Server.cpp \
-					src/CGI.cpp \
-					src/Utils.cpp
+SRCS = main.cpp \
+	src/Config.cpp \
+	src/config/ConfigServer.cpp \
+	src/config/ConfigLocation.cpp \
+	src/Response.cpp \
+	src/Request.cpp \
+	src/Server.cpp \
+	src/CGI.cpp \
+	src/Utils.cpp
 
-SRCS_C			=	test/Client.cpp
+OBJS = $(SRCS:.cpp=.o)
 
-OBJS			= $(SRCS:.cpp=.o)
-OBJS_C			= $(SRCS_C:.cpp=.o)
+CXX = g++
+RM = rm -f
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-CXX				= g++
-RM				= rm -f
-CXXFLAGS		= -Wall -Wextra -Werror -std=c++98
-
-NAME			= webserv
-NAME_C			= client
+NAME = webserv
 
 %.o : %.c
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-all:			$(NAME)
+all: $(NAME)
 
-$(NAME):		$(OBJS)
-				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
-				$(CXX) -o request test/Request.cpp
+$(NAME): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+	$(CXX) -o request test/Request.cpp
 
 clean:
-				$(RM) $(OBJS)
+	$(RM) $(OBJS)
 
-fclean:			clean
-				$(RM) $(NAME)
-				rm -f request
+fclean: clean
+	$(RM) $(NAME)
+	rm -f request
 
-re:				fclean $(NAME)
+re: fclean $(NAME)
 
-client:			$(OBJS_C)
-				$(CXX) $(CXXFLAGS) -o $(NAME_C) $(OBJS_C)
+leaks: all
+	valgrind ./$(NAME)
 
-leaks:			all
-				valgrind ./$(NAME)
-
-.PHONY:			all clean fclean re leaks
+.PHONY: all clean fclean re leaks

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/20 23:17:58 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/16 02:11:29 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,31 @@ std::string	Response::get_type( void ) const {
 }
 
 // FUNCTIONS
+
+/*std::string Response::_set_cookie( void ) {
+
+	std::stringstream	ss;
+
+	ConfigServer::cookies * cookies = _config->get_cookies();
+	ConfigServer::cookies::iterator it = cookies->begin();
+
+	if (_request.get_ressource()->find("Cookie") != _request.get_ressource()->npos))
+
+	ss << "Set-Cookie: ";
+
+	while (it != cookies->end()) {
+
+	}
+
+	if (!_config._cookies.empty()) {
+
+		for (auto it = cookies.begin(); it != cookies.end(); ++it) {
+			ss << it->first << "=" << it->second << "; ";
+		}
+		ss << "\r\n";
+	}
+	return ss.str();
+}*/
 
 std::string	Response::to_string( void ) const {
 

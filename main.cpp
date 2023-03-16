@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 16:30:46 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/19 23:33:17 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/15 20:07:21 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,10 @@ int	main( int argc, char **argv ) {
 			HTTP::Server server(&config);
 			server.run();
 		} catch(const std::exception& e) {
-			std::cerr << e.what() << std::endl;
+			std::cerr << ERROR << e.what() << std::endl;
+			return 1;
 		}
 	}
+	return 0;
 }
 

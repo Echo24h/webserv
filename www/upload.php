@@ -9,6 +9,10 @@ if(isset($_POST["submit"])) {
 
 	$countfiles = count($_FILES["file"]["name"]);
 
+	//if ($countfiles > 5)
+	//	$session->setFlash("Sorry, there was an error uploading your file.");
+
+
 	for($i = 0; $i < $countfiles; $i++) {
 
 		$target_file = $target_dir . basename($_FILES["file"]["name"][$i]);
@@ -22,7 +26,7 @@ if(isset($_POST["submit"])) {
 			if (!file_exists($target_file)) {
 
 				// Check file size
-				if ($_FILES["file"]["size"][$i] <= 500000) {
+				if ($_FILES["file"]["size"][$i] <= 50000000) {
 
 					// Allow certain file formats
 					if($imageFileType == "jpg" || $imageFileType == "png" || $imageFileType == "jpeg"

@@ -16,7 +16,7 @@
 .container {
 	width: 100%;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: center;
 	justify-content: center;
 	margin: 20px;
@@ -33,13 +33,23 @@ p {
 	color: #EAEAEA;
 }
 
-form{
+#container-cookie, #container-upload {
+	margin: 40px;
+	width: 500px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+
+#upload-form{
 	width: 500px;
 	height: 200px;
 	border: 4px dashed #EAEAEA;
 }
 
-form .text{
+#upload-form .text{
 	margin-top: -200px;
 	width: 100%;
 	height: 100%;
@@ -49,14 +59,14 @@ form .text{
 	align-items: center;
 	color: #EAEAEA;
 }
-form input{
+#upload-form input{
 	cursor: pointer;
 	height: 100%;
 	width: 100%;
 	outline: none;
 	opacity: 0;
 }
-form button {
+#upload-form button {
 	cursor: pointer;
 	color: #EAEAEA;
 	background: #16a085;
@@ -72,11 +82,11 @@ form button {
 
 }
 
-form button:hover{
+#upload-form button:hover{
 	background: #149174;
 	color: #0C5645;
 }
-form button:active{
+#upload-form button:active{
 	border:0;
 }
 
@@ -141,7 +151,8 @@ a:hover {
 	justify-content: center;
 	align-items: center;
 	height: 200px;
-	width: 600px;
+	width: 500px;
+	overflow: hidden;
 
 }
 
@@ -152,3 +163,65 @@ a:hover {
 	width: 200px;
 }
 
+.list .cookie-element {
+	display: flex;
+	justify-content:baseline;
+	align-items: center;
+	width: 100%;
+	margin: 3px;
+}
+
+.list .cookie-element p {
+	width: 100%;
+	text-align: center;
+}
+
+#cookie-form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: transparent;
+	border-radius: 0.5rem;
+	max-width: 400px;
+	height: 200px;
+	margin: 0 auto;
+  }
+
+  #cookie-form label {
+	font-weight: bold;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	color: #EAEAEA;
+  }
+
+  #cookie-form input[type="text"] {
+	border: none;
+	padding: 0.5rem;
+	width: 100%;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	color: black;
+  }
+
+  #cookie-form input[type="submit"] {
+	cursor: pointer;
+	color: #EAEAEA;
+	background: #16a085;
+	border: none;
+	width: 300px;
+	height: 35px;
+	margin-top: 20px;
+	margin-left: -4px;
+	border-radius: 4px;
+	border-bottom: 4px solid #117A60;
+	transition: all .2s ease;
+	outline: none;
+
+}
+
+#cookie-form input[type="submit"] button:hover{
+	background: #149174;
+	color: #0C5645;
+}
+#cookie-form input[type="submit"] button:active{
+	border:0;
+}

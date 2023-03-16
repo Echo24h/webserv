@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:24:04 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/20 22:39:24 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/15 19:10:41 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,10 @@ Config::tokens Config::_tokenize( void ) const {
 		size_t	len = 0;
 
 		while (str[pos]) {
+
 			// commentaire (bug si colé)
-			/*if (str[pos] == '#')
-				break;*/
+			if (str[pos] == '#')
+				break;
 
 			if (str[pos] == '{' || str[pos] == '}') {
 				tokens.push_back(std::string(1, str[pos]));
@@ -190,8 +191,9 @@ Config::tokens::const_iterator Config::_trait_serv_param( ConfigServer * server,
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'body_limit' in file \"" + std::string(_path) + "\"");
 		server->set_body_limit((*it).substr(0, (*it).length() - 1));
 	}
-	else
+	else {
 		throw std::invalid_argument("[Config.cpp] unknown argument '" + *it + "' in file \"" + std::string(_path) + "\"");
+	}
 	return it;
 }
 

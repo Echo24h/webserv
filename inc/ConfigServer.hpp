@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/20 22:39:39 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/16 02:11:45 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,12 +27,13 @@ class ConfigServer {
 
 public:
 
-	typedef ConfigLocation					location;
-	typedef std::vector<location>			locations;
-	typedef locations::iterator				iterator;
-	typedef locations::const_iterator		const_iterator;
+	typedef ConfigLocation						location;
+	typedef std::vector<location>				locations;
+	typedef locations::iterator					iterator;
+	typedef locations::const_iterator			const_iterator;
 
-	typedef Types							types;
+	typedef Types								types;
+	typedef std::map<std::string, std::string>	cookies;
 
 	// CANONICAL FORM
 
@@ -71,6 +72,8 @@ public:
 	void	new_location( const location & location );
 
 	// GETTERS
+
+	cookies *	get_cookies( void ) const;
 
 	std::string	get_host( void ) const;
 

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/02/11 17:03:28 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/16 02:11:09 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,18 +70,26 @@ void	CGI::_construct( void ) {
 
 std::string	CGI::_exec( void ) {
 
-	if (_request->get_method() == "POST"
-	&& itoa(_request->get_content().size()) != _request->get_ressource("Content-Length")) {
-		_code = HTTP::BAD_GATEWAY;
-		return "Losing data in file content";
-	}
-	else if (int(_request->get_content().size()) > _config->get_body_limit()) {
-		_code = HTTP::BAD_GATEWAY;
-		return "Request size too long";
-	}
+    // Vérifiez que la méthode est POST et que la taille de la requête est correcte
+    const std::string& method = _request->get_method();
+    const std::string& contentLength = _request->get_ressource("Content-Length");
+    const size_t contentSize = _request->get_content().size();
 
-	//std::cout << "req_content=" << itoa(_request->get_content().size()) << std::endl;
-	//std::cout << "org_content=" << _request->get_ressource("Content-Length") << std::endl;
+    if (method == "POST" && contentLength.empty()) {
+        _code = HTTP::BAD_REQUEST;
+        return "Missing Content-Length header";
+    }
+    else if (method == "POST" && std::size_t(std::atoi(contentLength.c_str())) != contentSize) {
+        _code = HTTP::BAD_REQUEST;
+        return "Content-Length does not match request body size";
+    }
+
+    // Vérifiez que la taille de la requête est valide
+    const int bodyLimit = _config->get_body_limit();
+    if (contentSize > static_cast<std::size_t>(bodyLimit)) {
+        _code = HTTP::BAD_REQUEST;
+        return "Request body size exceeds limit";
+    }
 
 	char ** env = _generate_env();
 
@@ -93,78 +101,74 @@ std::string	CGI::_exec( void ) {
 	arg[1] = strdup(_request->get_real_path().c_str());
 	arg[2] = NULL;
 
-	int	fd[2];
-	int	fd_err[2];
+	int fd[2], fd_err[2];
 
-	if (pipe(fd) == -1)
+
+    if (pipe(fd) == -1) {
+        _code = HTTP::INTERNAL_SERVER_ERROR;
+        return "Failed to create pipe";
+    }
+    if (pipe(fd_err) == -1) {
+        close(fd[0]);
+        close(fd[1]);
+        _code = HTTP::INTERNAL_SERVER_ERROR;
+        return "Failed to create error pipe";
+    }
+
+	int	pid = fork();
+
+	if (pid == -1) {
+		close(fd[0]);
+		close(fd[1]);
+		close(fd_err[0]);
+		close(fd_err[1]);
 		_code = HTTP::INTERNAL_SERVER_ERROR;
+	}
+	else if (pid == 0) {
+		close(fd_err[0]);
+		dup2(fd[0], STDIN_FILENO);
+		dup2(fd[1], STDOUT_FILENO);
+		dup2(fd_err[1], STDERR_FILENO);
+		close(fd[0]);
+		close(fd[1]);
+		close(fd_err[1]);
+		if (execve(arg[0], arg, env) == -1)
+			std::cerr << "CGI process fail" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	else {
-		if (pipe(fd_err) == -1) {
+
+		close(fd_err[1]);
+
+		int status;
+
+		//if request want to upload file
+		std::string	req_content = _request->get_content();
+		if (!req_content.empty())
+			write(fd[1], req_content.c_str(), req_content.size());
+
+		close(fd[1]);
+
+		if (waitpid(pid, &status, 0) == -1) {
 			close(fd[0]);
-			close(fd[1]);
+			close(fd_err[0]);
 			_code = HTTP::INTERNAL_SERVER_ERROR;
+			return "CGI process fail";
+		}
+		if (status == 0) {
+			_code = HTTP::OK;
+			close(fd_err[0]);
+			cgi_response = _read(fd[0]);
+			if (cgi_response.empty())
+				_code = HTTP::INTERNAL_SERVER_ERROR;
+			//std::cout << cgi_response << std::endl;
+			close(fd[0]);
 		}
 		else {
-			int	pid = fork();
-
-			if (pid == -1) {
-				close(fd[0]);
-				close(fd[1]);
-				close(fd_err[0]);
-				close(fd_err[1]);
-				_code = HTTP::INTERNAL_SERVER_ERROR;
-			}
-			else {
-				if (pid == 0) {
-					close(fd_err[0]);
-					dup2(fd[0], 0);
-					dup2(fd[1], 1);
-					dup2(fd_err[1], 2);
-					close(fd[0]);
-					close(fd[1]);
-					close(fd_err[1]);
-					if (execve(arg[0], arg, env) == -1)
-						std::cerr << "CGI process fail" << std::endl;
-					exit(1);
-				}
-				else {
-					int status;
-
-					//if request want to upload file
-					std::string	req_content = _request->get_content();
-					if (!req_content.empty())
-						write(fd[1], req_content.c_str(), req_content.size());
-
-					if (waitpid(pid, &status, 0) == -1) {
-						close(fd[0]);
-						close(fd[1]);
-						close(fd_err[0]);
-						close(fd_err[1]);
-						_code = HTTP::INTERNAL_SERVER_ERROR;
-					}
-					else {
-						if (status == 0) {
-							_code = HTTP::OK;
-							close(fd_err[0]);
-							close(fd_err[1]);
-							close(fd[1]);
-							cgi_response = _read(fd[0]);
-							if (cgi_response.empty())
-								_code = HTTP::INTERNAL_SERVER_ERROR;
-							//std::cout << cgi_response << std::endl;
-							close(fd[0]);
-						}
-						else {
-							_code = HTTP::INTERNAL_SERVER_ERROR;;
-							close(fd[0]);
-							close(fd[1]);
-							close(fd_err[1]);
-							cgi_response = _read(fd_err[0]);
-							close(fd_err[0]);
-						}
-					}
-				}
-			}
+			_code = HTTP::INTERNAL_SERVER_ERROR;;
+			close(fd[0]);
+			cgi_response = _read(fd_err[0]);
+			close(fd_err[0]);
 		}
 	}
 	int	i = 0;
@@ -230,7 +234,7 @@ char **	CGI::_generate_env( void ) const {
 	env["HTTP_ACCEPT"] = _request->get_ressource("Accept");
 	env["HTTP_ACCEPT_LANGUAGE"] = _request->get_ressource("Accept-Language");
 	env["HTTP_USER_AGENT"] = _request->get_ressource("User-Agent");
-	//env["HTTP_COOKIE"] = ""; // clef=valeur separate by ";"
+	env["HTTP_COOKIE"] = _request->get_ressource("Cookie"); // clef=valeur separate by ";"
 	env["HTTP_REFERER"] = _request->get_ressource("Referer");
 
 	char **	env_char = new char*[env.size() + 1];
