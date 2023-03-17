@@ -105,8 +105,8 @@ std::string	get_extension( const std::string & real_path ) {
 
 std::string	get_current_dir( void ) {
 
-	char * current_dir_name = get_current_dir_name();
-
+	char * current_dir_name = getcwd(NULL, MAXPATHLEN);
+	
 	std::string current_dir(current_dir_name);
 
 	free(current_dir_name);
