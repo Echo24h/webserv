@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/16 02:12:06 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/17 23:37:11 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 namespace HTTP {
 
-ConfigServer::ConfigServer( void ) : _host("localhost"), _port(80), _error_path("err/"), _body_limit(1980) {
+ConfigServer::ConfigServer( void ) : _host("localhost"), _port(80), _body_limit(1980) {
 	return ;
 }
 
@@ -87,8 +87,6 @@ void	ConfigServer::set_server_name( const std::string & server_name ) {
 }
 
 void	ConfigServer::set_error_path( const std::string & error_path ) {
-	if (error_path.empty())
-		throw std::invalid_argument("[ConfigServer.cpp] error path is empty");
 	_error_path = error_path;
 	return ;
 }
@@ -96,7 +94,12 @@ void	ConfigServer::set_error_path( const std::string & error_path ) {
 void	ConfigServer::set_body_limit( const std::string & body_limit ) {
 
 	char		extension = *body_limit.rbegin();
-	std::string	num = body_limit.substr(0, body_limit.size() - 1);
+	std::string	num;
+
+	if (extension == 'M' || extension == 'K')
+		num = body_limit.substr(0, body_limit.size() - 1);
+	else
+		num = body_limit.substr(0, body_limit.size());
 
 	if (num.empty() || !is_number(num))
 		throw std::invalid_argument("[ConfigServer.cpp] wrong body_limit");
@@ -105,8 +108,6 @@ void	ConfigServer::set_body_limit( const std::string & body_limit ) {
 		_body_limit = atoi(num.c_str()) * 1000000;
 	else if (extension == 'K')
 		_body_limit = atoi(num.c_str()) * 1000;
-	else
-		throw std::invalid_argument("[ConfigServer.cpp] inknow body_limit type");
 
 	if (_body_limit < 2)
 		throw std::invalid_argument("[ConfigServer.cpp] body must be larger than 1Ko");
@@ -173,13 +174,11 @@ std::string	ConfigServer::get_real_path( const std::string & virtual_path ) cons
 			std::string path = virtual_path.substr(start, virtual_path.size() - start);
 
 			std::string location_root = location.get_root();
-			std::string locaiton_index = location.get_index();
+			std::string location_index = location.get_index();
 
-			if (file_exist(location_root + path))
-				return location_root + path;
-			else if (location_name.size() == virtual_path.size() && file_exist(location_root + locaiton_index))
-				return location_root + locaiton_index;
-			return std::string();
+			if (location_name.size() == virtual_path.size() && file_exist(location_root + location_index))
+				return location_root + location_index;
+			return location_root + path;
 		}
 	}
 	return std::string();

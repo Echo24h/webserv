@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/20 22:48:31 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/17 21:20:21 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <cstdlib> //free()
 # include <unistd.h> // get_current_dir_name()
 # include <ctype.h> // isdigit()
+# include <sys/param.h> // MAXPATHLEN
 
 #define	RED			"\033[1;31m"
 #define	GREEN		"\033[1;32m"

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/11 21:29:41 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/13 14:33:14 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/17 21:42:50 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ public:
 
 	//Use file path "conf/default.types" for default construct
 	Types( void ) {
-		_construct("conf/default.types");
+		_construct("conf/mime.types");
 		return ;
 	}
 

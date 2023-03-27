@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/16 01:07:07 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/17 22:41:50 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,10 @@ Request	& Request::operator=( Request const & rhs ) {
 
 std::string	Request::get_method( void ) const {
 	return _method;
+}
+
+ConfigLocation	Request::get_location( void ) const {
+	return _loc;
 }
 
 std::string	Request::get_virtual_path( void ) const {
@@ -117,7 +121,12 @@ void	Request::_construct_header( const std::string & line ) {
 	std::vector<std::string> tokens = split(line, " ");
 
 	if (tokens.size() == 3) {
-		_method = tokens[0];
+
+		this->_loc = _config->get_location(tokens[1]);
+
+		if (this->_loc.is_method(tokens[0]))
+			_method = tokens[0];
+
 		if (_method == "GET" && tokens[1].find('?') != (size_t)-1) {
 			_query = tokens[1].substr(tokens[1].find('?') + 1, tokens[1].size() - tokens[1].find('?') - 1);
 			_virtual_path = tokens[1].substr(0, tokens[1].find('?'));
@@ -129,7 +138,7 @@ void	Request::_construct_header( const std::string & line ) {
 		}
 		_version = tokens[2];
 
-		_cgi = _config->get_location(tokens[1]).get_cgi(get_extension(_real_path));
+		_cgi = this->_loc.get_cgi(get_extension(_real_path));
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/16 02:11:09 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/17 21:24:51 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,7 +214,7 @@ char **	CGI::_generate_env( void ) const {
 	env["SERVER_PROTOCOL"] = _request->get_version();
 	env["SERVER_PORT"] = _config->get_port();
 	env["REQUEST_METHOD"] = _request->get_method();
-	env["PATH_INFO"] = get_current_dir() + _request->get_real_path();
+	env["PATH_INFO"] = get_current_dir() + "/" + _request->get_real_path();
 	env["PATH_TRANSLATED"] = _request->get_real_path();
 	env["SCRIPT_NAME"] = _request->get_cgi();
 	//env["SCRIPT_FILENAME"] = _request->get_cgi();

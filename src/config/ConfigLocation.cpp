@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/11 19:37:23 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/15 20:54:40 by gborne           ###   ########.fr       */
+/*   Updated: 2023/03/18 00:02:50 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,10 @@ ConfigLocation &	ConfigLocation::operator=( const ConfigLocation & rhs ) {
 
 // SETTERS
 
-void	ConfigLocation::set_name( const std::string & name ) { _name = name; return ; }
+void	ConfigLocation::set_name( const std::string & name ) {
+	_name = name;
+	return ;
+}
 
 void	ConfigLocation::new_method( const std::string & method ) {
 
