@@ -5,7 +5,7 @@
 
 # Serveur HTTP en C++98 inspiré de NGINX
 
-Webserv est un serveur HTTP écrit en C++98 inspiré de NGINX. Le serveur prend en charge les méthodes HTTP GET, POST et DELETE et peut être configuré pour gérer plusieurs connexions simultanément.
+Webserv est un serveur HTTP écrit en C++98 inspiré de NGINX. Le serveur prend en charge les méthodes HTTP GET, POST, PUT et DELETE et peut être configuré pour gérer plusieurs connexions simultanément.
 
 En plus des fonctionnalités mentionnées, Webserv prend également en charge les cookies, l'upload de fichiers et les CGI.
 
@@ -70,6 +70,7 @@ Webserv prend en charge les méthodes HTTP suivantes :
 ```
 GET
 POST
+PUT
 DELETE
 ```
 
