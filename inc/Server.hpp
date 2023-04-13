@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:18:38 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/18 19:06:30 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/11 17:45:57 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class Server {
 
 public:
 
-	typedef	std::map<int, const ConfigServer *>	listens;
+	typedef	std::map<int, ConfigServer *>	listens;
 
 	// CANONICAL FORM
 
@@ -60,7 +60,7 @@ private:
 
 	int		_accept_connection( const int & server_socket ) const;
 
-	void	_handle_connexion( const int & client_socket, const ConfigServer * config ) const;
+	void	_handle_connexion( const int & client_socket, ConfigServer * config ) const;
 
 	Config *	_config;
 	listens		_listens;

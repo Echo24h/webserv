@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 18:16:41 by gborne            #+#    #+#             */
-/*   Updated: 2022/12/20 22:48:13 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 13:57:29 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,19 +52,15 @@ bool	is_number( const std::string & s )
 
 
 bool	file_exist( const std::string & path ) {
-	std::ifstream	ifs(path.c_str());
-	if (ifs.fail())
-		return false;
-	else {
-		std::string	str;
-		std::getline(ifs, str);
-		ifs.close();
-		// if str is empty, is probably a directory
-		if (str.empty())
-			return false;
-		else
-			return true;
+	struct stat st;
+	if (stat(path.c_str(), &st) != 0) {
+		return false;  // erreur de stat()
 	}
+	if ((st.st_mode & S_IFMT) == S_IFDIR) {
+		return false;  // le chemin correspond à un dossier
+	}
+	std::ifstream file(path.c_str());
+	return file.good();
 }
 
 std::string	get_key( const std::string & line, const std::string & separator ) {
@@ -129,6 +125,26 @@ std::string read_file( const std::string & path ) {
 		ifs.close();
 	}
 	return content;
+}
+
+void	create_file( const std::string & file_name, const std::string & content ) {
+	
+	std::ofstream file(file_name.c_str());
+
+	if (!file.is_open()) {
+		std::cerr << ERROR << "[Utils.cpp] createFileFromString() : can't open " << file_name << " : " << strerror(errno) << std::endl;
+		return;
+	}
+
+	try {
+		file << content;
+		file.close();
+	} catch ( const std::exception & e ) {
+		file.close();
+		std::remove(file_name.c_str());
+		std::cerr << ERROR << "[Utils.cpp] createFileFromString() : can't write on " << file_name << " : " << e.what() << std::endl;
+		throw;
+	}
 }
 
 } // namespace HTTP

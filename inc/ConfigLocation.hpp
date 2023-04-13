@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/11 19:21:42 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/15 20:42:15 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/12 18:06:18 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ public:
 
 	std::string	get_root( void ) const;
 
+	std::string	get_params( void ) const;
+
 	cgi			get_cgis( void ) const;
 
 	std::string	get_cgi( const std::string & extension ) const;
@@ -72,6 +74,7 @@ private:
 	methods			_methods;
 	std::string		_index;
 	std::string		_root;
+	std::string		_params;
 	cgi				_cgi;
 };
 

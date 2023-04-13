@@ -6,11 +6,11 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/17 23:37:11 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/12 18:16:11 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/ConfigServer.hpp"
+#include "../inc/ConfigServer.hpp"
 
 namespace HTTP {
 
@@ -115,7 +115,7 @@ void	ConfigServer::set_body_limit( const std::string & body_limit ) {
 	return ;
 }
 
-void	ConfigServer::new_location( const ConfigServer::location & location ) {
+void	ConfigServer::new_location( ConfigServer::location & location ) {
 	_locations.push_back(location);
 	return ;
 }
@@ -134,54 +134,47 @@ std::string				ConfigServer::get_error_path( void ) const { return _error_path; 
 
 int						ConfigServer::get_body_limit( void ) const { return _body_limit; }
 
-ConfigServer::location	ConfigServer::get_location( const std::string & virtual_path ) const {
+ConfigServer::location	* ConfigServer::get_location( const std::string & virtual_path ) {
 
-	ConfigServer::const_iterator	it = _locations.begin();
-	ConfigServer::const_iterator	ite = _locations.end();
+	ConfigServer::iterator	it = _locations.begin();
+	ConfigServer::iterator	ite = _locations.end();
 
-	ConfigServer::location	location;
+	ConfigServer::location	* location = NULL;
 
 	while (it != ite) {
-		std::string location_name = it->get_name();
-		if (virtual_path.find(location_name) == 0)
-			if (location.get_name().empty() || location_name.size() < location_name.size())
-				location = *it;
+
+		std::string path = virtual_path;
+		std::string loc_name = it->get_name();
+
+		if (path[0] != '/')
+			path = std::string("/" + path);
+		if (path.size() > 1 && path[path.size() - 1] == '/')
+			path = path.substr(0, path.size() - 1);
+
+		//if (location != NULL)
+		//	std::cout << "it->get_name(): " << it->get_name() << std::endl;
+		//std::cout << "loc_name: " << loc_name << std::endl;
+		//std::cout << "path: " << path << std::endl;
+
+		if (path.compare(0, loc_name.size(), loc_name) == 0) {
+			
+			if (location == NULL || location->get_name().size() < loc_name.size())
+            	location = &(*it);
+        }
+
 		it++;
 	}
+	//if (location != NULL)
+	//	std::cout << "choice: location->get_name(): " << location->get_name() << std::endl;
+	//else
+	//	std::cout << "choice: NULL" << std::endl;
 	return location;
 }
 
-ConfigServer::locations	ConfigServer::get_locations( void ) const { return _locations; }
+ConfigServer::locations	ConfigServer::get_locations( void ) { return _locations; }
 
 std::string	ConfigServer::get_type( const std::string & extension ) const {
 	return _types.get_type(extension);
-}
-
-std::string	ConfigServer::get_real_path( const std::string & virtual_path ) const {
-
-	// secure "../" access
-	if (virtual_path.find("..") == (size_t)-1) {
-
-		ConfigServer::location	location = get_location(virtual_path);
-
-		if (!location.get_name().empty()) {
-
-			std::string location_name = location.get_name();
-			size_t	start = location_name.size();
-			if (start > 1)
-				start++;
-
-			std::string path = virtual_path.substr(start, virtual_path.size() - start);
-
-			std::string location_root = location.get_root();
-			std::string location_index = location.get_index();
-
-			if (location_name.size() == virtual_path.size() && file_exist(location_root + location_index))
-				return location_root + location_index;
-			return location_root + path;
-		}
-	}
-	return std::string();
 }
 
 // STREAM
@@ -192,9 +185,8 @@ std::ostream &	operator<<( std::ostream & o, ConfigServer const & rhs ) {
 	o << "serverName = " << rhs.get_server_name() << std::endl;
 	o << "errorPath  = " << rhs.get_error_path() << std::endl;
 	o << "bodyLimit  = " << rhs.get_body_limit() << std::endl;
-	ConfigServer::locations	loc = rhs.get_locations();
-	ConfigServer::iterator	it = loc.begin();
-	ConfigServer::iterator	ite = loc.end();
+	ConfigServer::const_iterator	it = rhs.begin();
+	ConfigServer::const_iterator	ite = rhs.end();
 	int i = 1;
 	while (it != ite) {
 		o << BLUE << "location " << i << ":" << DEF << std::endl;

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:35:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/16 01:52:14 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/12 16:43:22 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,8 @@ private:
 	void		_construct_error( const int & code, const std::string & msg = std::string() );
 
 	void		_construct_delete( void );
+
+	void		_construct_put( void );
 
 	const ConfigServer *	_config;
 	const Request *			_request;

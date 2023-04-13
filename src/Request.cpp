@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/17 22:41:50 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 13:58:38 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 namespace HTTP {
 
-Request::Request( const ConfigServer * config, const int & client_socket ) : _config(config) {
+Request::Request( ConfigServer * config, const int & client_socket ) : _config(config) {
 	std::string buff = _read(client_socket);
 	//std::cout << buff << std::endl;
 	_construct(buff);
@@ -49,7 +49,7 @@ std::string	Request::get_method( void ) const {
 	return _method;
 }
 
-ConfigLocation	Request::get_location( void ) const {
+ConfigLocation	* Request::get_location( void ) const {
 	return _loc;
 }
 
@@ -57,8 +57,52 @@ std::string	Request::get_virtual_path( void ) const {
 	return _virtual_path;
 }
 
-std::string	Request::get_real_path( void ) const {
-	return _real_path;
+std::string	Request::get_real_path() const {
+
+	// secure "../" access
+	if (_virtual_path.find("..") == (size_t)-1) {
+
+		if (_loc != NULL) {
+
+			std::string location_name = _loc->get_name();
+			size_t	start = location_name.size();
+
+			//std::cout << "_loc->get_name(): " << _loc->get_name() << std::endl;
+			//std::cout << "_virtual_path: " << _virtual_path << std::endl;
+			//std::cout << "_loc->get_root(): " << _loc->get_root() << std::endl;
+			//std::cout << "_loc->get_index(): " << _loc->get_index() << std::endl;
+
+			std::string path = _virtual_path.substr(start, _virtual_path.size() - start);
+
+			//std::cout << "path: " << path << std::endl;
+			//std::cout << "path.empty(): " << path.empty() << std::endl;
+			//std::cout << "_loc->get_root() + path: " << _loc->get_root() + path << std::endl;
+			//std::cout << "_loc->get_root() + _loc->get_index(): " << _loc->get_root() + _loc->get_index() << std::endl;
+
+			if (!path.empty()) {
+
+				if (_loc->get_params().empty()) {
+					return std::string();
+				}
+				// POUR DIFFERENCIER "/" et "/*"
+				//else if (_loc->get_params() == "/" && ((path.find("/", 1) != (size_t)-1) || path.find("?", 0) != (size_t)-1)) {
+				//	return std::string();
+				//}
+				else if (file_exist(_loc->get_root() + path) || _method == "PUT") {
+					return _loc->get_root() + path;
+				}
+				else if (file_exist(_loc->get_root() + path + "/" + _loc->get_index())) {
+					return _loc->get_root() + path + "/" + _loc->get_index();
+				}
+			}
+			else {
+				if (file_exist(_loc->get_root() + _loc->get_index())) {
+					return _loc->get_root() + _loc->get_index();
+				}
+			}
+		}
+	}
+	return std::string();
 }
 
 std::string	Request::get_cgi( void ) const {
@@ -122,23 +166,23 @@ void	Request::_construct_header( const std::string & line ) {
 
 	if (tokens.size() == 3) {
 
-		this->_loc = _config->get_location(tokens[1]);
+		_loc = _config->get_location(tokens[1]);
 
-		if (this->_loc.is_method(tokens[0]))
+		if (_loc->is_method(tokens[0]))
 			_method = tokens[0];
 
 		if (_method == "GET" && tokens[1].find('?') != (size_t)-1) {
 			_query = tokens[1].substr(tokens[1].find('?') + 1, tokens[1].size() - tokens[1].find('?') - 1);
 			_virtual_path = tokens[1].substr(0, tokens[1].find('?'));
-			_real_path = _config->get_real_path(_virtual_path);
+			_real_path = get_real_path();
 		}
 		else {
 			_virtual_path = tokens[1];
-			_real_path = _config->get_real_path(_virtual_path);
+			_real_path = get_real_path();
 		}
 		_version = tokens[2];
 
-		_cgi = this->_loc.get_cgi(get_extension(_real_path));
+		_cgi = _loc->get_cgi(get_extension(_real_path));
 	}
 }
 

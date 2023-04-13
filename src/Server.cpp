@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/16 01:05:54 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/11 17:47:31 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,8 @@ Server &	Server::operator=( const Server & rhs ) {
 
 void	Server::_setup_server( void ) {
 
-	Config::const_iterator	it = _config->begin();
-	Config::const_iterator	ite = _config->end();
+	Config::iterator	it = _config->begin();
+	Config::iterator	ite = _config->end();
 
 	while (it != ite) {
 
@@ -80,19 +80,24 @@ int	Server::_accept_connection( const int & server_socket ) const {
 
 	if ((client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addrlen)) == -1)
 		std::cerr << ERROR << "[Server.cpp] accept() : " << strerror(errno) << std::endl;
-	else
-		std::cout << CONNECT << "[" << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port) << "]" << std::endl;
 
 	fcntl(client_socket, F_SETFL, O_NONBLOCK);
 
 	return client_socket;
 }
 
-void	Server::_handle_connexion( const int & client_socket, const ConfigServer * config ) const {
+void	Server::_handle_connexion( const int & client_socket, ConfigServer * config ) const {
+
+	// On récupère les informations du client pour l'affichage dans la console
+    struct sockaddr_in addr;
+    socklen_t addrlen = sizeof(addr);
+    getsockname(client_socket, (struct sockaddr *)&addr, &addrlen);
 
 	HTTP::Request	request = Request(config, client_socket);
 
-	std::cout << RECV << request << std::endl;
+	std::cout << YELLOW << "New connection" << DEF << std::endl;
+
+	std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
 
 	HTTP::Response	response = Response(config, &request);
 
@@ -101,14 +106,12 @@ void	Server::_handle_connexion( const int & client_socket, const ConfigServer * 
 	if (response_string.empty())
 		std::cerr << ERROR << "[Server.cpp] Empty response" << std::endl;
 	else {
-		std::cout << SEND << response << std::endl;
+		std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << std::endl;
 
 		if (send(client_socket, response_string.c_str(), response_string.size(), 0) == -1)
 			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
 	}
 	close(client_socket);
-
-	std::cout << DISCONNECT << std::endl;
 }
 
 void	Server::run( void ) {
@@ -117,15 +120,15 @@ void	Server::run( void ) {
 
 	fd_set								current_sockets, ready_sockets;
 
-	std::map<int, const ConfigServer *>	clients_config;
+	std::map<int, ConfigServer *>	clients_config;
 
 	_setup_server();
 
 	// initialize my current set
 	FD_ZERO(&current_sockets);
 
-	Server::listens::const_iterator	it = _listens.begin();
-	Server::listens::const_iterator	ite = _listens.end();
+	Server::listens::iterator	it = _listens.begin();
+	Server::listens::iterator	ite = _listens.end();
 
 	while (it != ite) {
 		int server_socket = it->first;
@@ -146,7 +149,7 @@ void	Server::run( void ) {
 		for (int i = 0; i <= max_socket_so_far; i++) {
 			if (FD_ISSET(i, &ready_sockets)) {
 
-				Server::listens::const_iterator it = _listens.find(i);
+				Server::listens::iterator it = _listens.find(i);
 
 				if (it != _listens.end()) {
 					//this is a new connection

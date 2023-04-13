@@ -6,17 +6,19 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/11 19:37:23 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/18 00:02:50 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/12 18:14:12 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/ConfigLocation.hpp"
+#include "../inc/ConfigLocation.hpp"
 
 namespace HTTP {
 
 // CANONICAL FORM
 
-ConfigLocation::ConfigLocation( void ) { return ; }
+ConfigLocation::ConfigLocation( void ) {
+	return ; 
+}
 
 ConfigLocation::ConfigLocation( const ConfigLocation & src ) { *this = src; return ; }
 
@@ -27,20 +29,44 @@ ConfigLocation &	ConfigLocation::operator=( const ConfigLocation & rhs ) {
 	_methods = rhs._methods;
 	_index = rhs._index;
 	_root = rhs._root;
+	_params = rhs._params;
 	_cgi = rhs._cgi;
 	return *this;
 }
 
 // SETTERS
 
+// défini les paramètres de root et le nom de location
 void	ConfigLocation::set_name( const std::string & name ) {
-	_name = name;
+
+	std::string loc_name = name;
+
+	if (loc_name[0] != '/')
+		throw std::invalid_argument("[ConfigLocation.cpp] invalid location '" + name + "' in config file");
+	
+	if (loc_name.size() == 1 && loc_name == "/")
+		this->_params = std::string("/*");
+	else if (loc_name.size() > 1) {
+
+		if (loc_name[loc_name.size() - 1] == '/') {
+			loc_name = loc_name.substr(0, loc_name.size() - 1);
+			this->_params = std::string("/");
+		}
+		else if (loc_name.size() > 2) {
+			
+			if (loc_name[loc_name.size() - 1] == '*' && loc_name[loc_name.size() - 2] == '/') {
+				this->_params = std::string("/*");
+				loc_name = loc_name.substr(0, loc_name.size() - 2);
+			}
+		}
+	}
+	_name = loc_name;
 	return ;
 }
 
 void	ConfigLocation::new_method( const std::string & method ) {
 
-	if (method != "DELETE" && method != "POST" && method != "GET")
+	if (method != "DELETE" && method != "POST" && method != "GET" && method != "PUT")
 		throw std::invalid_argument("[ConfigLocation.cpp] invalid method '" + method + "' in config file");
 	_methods.push_back(method);
 	return ;
@@ -65,6 +91,8 @@ std::string	ConfigLocation::get_index( void ) const { return _index; }
 
 std::string	ConfigLocation::get_root( void ) const { return _root; }
 
+std::string	ConfigLocation::get_params( void ) const { return _params; }
+
 ConfigLocation::cgi			ConfigLocation::get_cgis( void ) const { return _cgi; }
 
 std::string	ConfigLocation::get_cgi( const std::string & extension ) const {
@@ -82,7 +110,7 @@ bool	ConfigLocation::is_method( const std::string & method ) const {
 
 	ConfigLocation::methods::const_iterator	it = _methods.begin();
 	ConfigLocation::methods::const_iterator	ite = _methods.end();
-
+	
 	while (it != ite) {
 		if (*it == method)
 			return true;
@@ -106,6 +134,7 @@ std::ostream &	operator<<( std::ostream & o, ConfigLocation const & rhs ) {
 	o << std::endl;
 	o << "	index   = " << rhs.get_index() << std::endl;
 	o << "	root    = " << rhs.get_root() << std::endl;
+	o << "	params  = " << rhs.get_params() << std::endl;
 	o << "	cgi:" << std::endl;
 	ConfigLocation::cgi cgi = rhs.get_cgis();
 	ConfigLocation::cgi::const_iterator	it_c = cgi.begin();

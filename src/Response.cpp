@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/18 00:03:18 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 13:57:42 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ std::string	Response::to_string( void ) const {
 	std::string			response;
 
 	ss << "HTTP/1.1 " << itoa(_code) << "\r\n";
-	if (_request->get_method() != "DELETE") {
+	if (_request->get_method() != "DELETE" && _request->get_method() != "PUT") {
 		ss << "Content-Type: " << _type << "\r\n";
 		ss << "Content-Length: " << _content.size() << "\r\n";
 		ss << "Connection: keep-alive\r\n\r\n";
@@ -142,27 +142,39 @@ void	Response::_construct_delete( void ) {
 	}
 }
 
+void	Response::_construct_put( void ) {
+	//std::cout << "method put" << std::endl;
+	//std::cout << "content: " << _request->get_content() << std::endl;
+	std::cout << _request->get_content().size() << std::endl;
+}
+
 void	Response::_construct( void ) {
 
 	_final_path = _request->get_real_path();
 	_type = _config->get_type(get_extension(_final_path));
 
+	//std::cout << "real_path: " << _request->get_real_path() << std::endl;
+	//std::cout << "virtual_path: " << _request->get_virtual_path() << std::endl;
+	//std::cout << "location_name: " << _request->get_location()->get_name() << std::endl;
+
 	if (_request->get_version() != "HTTP/1.1")
 		_construct_error(HTTP::HTTP_VERSION_NOT_SUPPORTED);
 	else if (_request->get_method().empty())
 		_construct_error(HTTP::METHOD_NOT_ALLOWED);
-	else if (!file_exist(_final_path)
-	&& _request->get_virtual_path().compare(_request->get_location().get_name()) != 0) {
+	else if (_request->get_real_path().empty()) {
 		_construct_error(HTTP::NOT_FOUND);
-		std::cout << _request->get_virtual_path() << std::endl;
-		std::cout << _request->get_location().get_name() << std::endl;
+		std::cout << "real_path: " << _request->get_real_path() << std::endl;
+		std::cout << "virtual_path: " << _request->get_virtual_path() << std::endl;
+		std::cout << "location_name: " << _request->get_location()->get_name() << std::endl;
 	}
 	else if (_request->get_method() == "DELETE")
 		_construct_delete();
+	else if (_request->get_method() == "PUT")
+		_construct_put();
 	else if (_request->is_cgi())
 		_construct_cgi();
 	else if (_type.empty())
-		_construct_error(HTTP::BAD_REQUEST);
+		_construct_error(HTTP::UNSUPORTED_MEDIA_TYPE);
 	else {
 		_code = HTTP::OK;
 		_content = read_file(_final_path);

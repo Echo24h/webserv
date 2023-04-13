@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/17 21:20:21 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 13:41:04 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,13 @@
 # include <fstream>
 # include <sstream>
 # include <vector>
+# include <cstring>
 # include <cstdlib> //free()
 # include <unistd.h> // get_current_dir_name()
 # include <ctype.h> // isdigit()
 # include <sys/param.h> // MAXPATHLEN
+# include <sys/stat.h> // Vérif Dossier
+# include <cerrno>
 
 #define	RED			"\033[1;31m"
 #define	GREEN		"\033[1;32m"
@@ -54,6 +57,7 @@ enum Code {
 	NOT_FOUND = 404,
 	METHOD_NOT_ALLOWED = 405,
 	REQUEST_TIMEOUT = 408,
+	UNSUPORTED_MEDIA_TYPE = 415,
 
 	INTERNAL_SERVER_ERROR = 500,
 	BAD_GATEWAY = 502,
@@ -78,6 +82,8 @@ std::string					get_extension( const std::string & real_path );
 std::string					get_current_dir( void );
 
 std::string					read_file( const std::string & path );
+
+void						create_file( const std::string & file_name, const std::string & content );
 
 } // namespace HTTP
 

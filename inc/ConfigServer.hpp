@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/16 02:11:45 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/11 17:29:56 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ public:
 
 	void	set_body_limit( const std::string & body_limit );
 
-	void	new_location( const location & location );
+	void	new_location( location & location );
 
 	// GETTERS
 
@@ -85,14 +85,11 @@ public:
 
 	int			get_body_limit( void ) const;
 
-	// /!\ if location isn't find, return location without anything set
-	location	get_location( const std::string & virtual_path ) const;
+	location	* get_location( const std::string & virtual_path );
 
-	locations	get_locations( void ) const;
+	locations	get_locations( void );
 
 	std::string	get_type( const std::string & extension ) const;
-
-	std::string	get_real_path( const std::string & virtual_path ) const;
 
 private:
 

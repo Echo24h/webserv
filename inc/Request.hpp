@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 00:10:36 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/17 22:34:34 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/11 18:12:21 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ public:
 
 	typedef	std::map<std::string, std::string>	ressources;
 
-	Request( const ConfigServer * config, const int & client_socket );
+	Request( ConfigServer * config, const int & client_socket );
 
 	Request( const Request & src );
 
@@ -46,7 +46,7 @@ public:
 
 	std::string	get_method( void ) const;
 
-	ConfigLocation	get_location( void ) const;
+	ConfigLocation	* get_location( void ) const;
 
 	std::string	get_virtual_path( void ) const;
 
@@ -84,8 +84,8 @@ private:
 	ressources	_ressources;
 	std::string	_content;
 
-	const ConfigServer *	_config;
-	ConfigLocation			_loc;
+	ConfigServer *	_config;
+	ConfigLocation *		_loc;
 
 };
 
