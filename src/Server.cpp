@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/11 17:47:31 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 19:16:18 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,9 +93,9 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
     socklen_t addrlen = sizeof(addr);
     getsockname(client_socket, (struct sockaddr *)&addr, &addrlen);
 
-	HTTP::Request	request = Request(config, client_socket);
-
 	std::cout << YELLOW << "New connection" << DEF << std::endl;
+
+	HTTP::Request	request = Request(config, client_socket);
 
 	std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
 

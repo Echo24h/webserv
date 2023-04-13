@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 00:10:36 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/11 18:12:21 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 19:12:42 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ public:
 
 private:
 
-	std::string	_read( const int & client_socket ) const;
+	std::string	_read_socket( const int & client_socket ) const;
 
 	void		_construct_header( const std::string & line );
 

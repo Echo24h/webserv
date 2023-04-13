@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/03/17 21:24:51 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 20:27:52 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,11 +75,15 @@ std::string	CGI::_exec( void ) {
     const std::string& contentLength = _request->get_ressource("Content-Length");
     const size_t contentSize = _request->get_content().size();
 
-    if (method == "POST" && contentLength.empty()) {
-        _code = HTTP::BAD_REQUEST;
-        return "Missing Content-Length header";
-    }
-    else if (method == "POST" && std::size_t(std::atoi(contentLength.c_str())) != contentSize) {
+	//std::cout << contentLength << std::endl;
+	//std::cout << contentSize << std::endl;
+
+    //if (method == "POST" && contentLength.empty()) {
+    //    _code = HTTP::BAD_REQUEST;
+    //    return "Missing Content-Length header";
+    //}
+    //else 
+	if (method == "POST" && !contentLength.empty() && std::size_t(std::atoi(contentLength.c_str())) != contentSize) {
         _code = HTTP::BAD_REQUEST;
         return "Content-Length does not match request body size";
     }
@@ -115,6 +119,14 @@ std::string	CGI::_exec( void ) {
         return "Failed to create error pipe";
     }
 
+	//PRINT FOR DEBUG
+	//std::cout << "FILE:" << std::endl << arg[0] << std::endl;
+	//std::cout << "ARGV:" << std::endl << arg[0] << std::endl << arg[1] << std::endl;
+	//std::cout << "ENVP:" << std::endl;
+	//for (int i = 0; env[i] != NULL; i++)
+	//	std::cout << env[i] << std::endl;
+
+
 	int	pid = fork();
 
 	if (pid == -1) {
@@ -133,7 +145,7 @@ std::string	CGI::_exec( void ) {
 		close(fd[1]);
 		close(fd_err[1]);
 		if (execve(arg[0], arg, env) == -1)
-			std::cerr << "CGI process fail" << std::endl;
+			std::cerr << "CGI process fail: excve errno " << errno << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	else {
@@ -212,7 +224,7 @@ char **	CGI::_generate_env( void ) const {
 
 	// Request
 	env["SERVER_PROTOCOL"] = _request->get_version();
-	env["SERVER_PORT"] = _config->get_port();
+	env["SERVER_PORT"] = itoa(_config->get_port());
 	env["REQUEST_METHOD"] = _request->get_method();
 	env["PATH_INFO"] = get_current_dir() + "/" + _request->get_real_path();
 	env["PATH_TRANSLATED"] = _request->get_real_path();
@@ -226,8 +238,10 @@ char **	CGI::_generate_env( void ) const {
 	//env["REMOTE_USER"] = "";
 	//env["REMOTE_IDENT"] = "";
 	if (_request->get_method() == "POST") {
-		env["CONTENT_TYPE"] = _request->get_ressource("Content-Type");
-		env["CONTENT_LENGTH"] = _request->get_ressource("Content-Length");
+		if (!_request->get_ressource("Content-Type").empty())
+			env["CONTENT_TYPE"] = _request->get_ressource("Content-Type");
+		if (!_request->get_ressource("Content-Length").empty())
+			env["CONTENT_LENGTH"] = _request->get_ressource("Content-Length");
 	}
 
 	// Client

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 13:41:04 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 19:25:59 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@
 namespace HTTP {
 
 # define LINE_END	"\r\n"
-# define BUFF_SIZE	8192
+# define BUFF_SIZE	100000
 
 enum Code {
 
@@ -83,7 +83,9 @@ std::string					get_current_dir( void );
 
 std::string					read_file( const std::string & path );
 
-void						create_file( const std::string & file_name, const std::string & content );
+int							create_file( const std::string & file_name, const std::string & content );
+
+bool						is_string_greater_than_int_max( const std::string & number_string );
 
 } // namespace HTTP
 

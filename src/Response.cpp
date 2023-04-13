@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 13:57:42 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 20:18:30 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,11 +83,11 @@ std::string	Response::to_string( void ) const {
 	std::string			response;
 
 	ss << "HTTP/1.1 " << itoa(_code) << "\r\n";
-	if (_request->get_method() != "DELETE" && _request->get_method() != "PUT") {
+	if (_request->get_method() != "DELETE") {
 		ss << "Content-Type: " << _type << "\r\n";
 		ss << "Content-Length: " << _content.size() << "\r\n";
 		ss << "Connection: keep-alive\r\n\r\n";
-		if (!(_code >= 400 && _config->get_error_path().empty()) && !_content.empty())
+		if (!(_code >= 400 && _config->get_error_path().empty()) && !_content.empty() && _code != 204)
 			ss << _content << "\r\n";
 	}
 	response = ss.str();
@@ -143,9 +143,44 @@ void	Response::_construct_delete( void ) {
 }
 
 void	Response::_construct_put( void ) {
+	
+	std::stringstream	ss(_request->get_content().c_str());
+	//std::cout << _request->get_content() << std::endl;
+	int					chunk_size;
+	std::string			str;
+	std::string			content;
+
+	//while (true) {
+        // Read chunk size in hex
+
+	std::getline(ss, str);
+
+	try {
+		chunk_size = std::stoi(str, 0, 16);
+	} catch ( const std::exception & e ) {
+		std::cerr << ERROR << "[Response.cpp] _construct_put() : Invalid chunk size" << std::endl;
+	}
+
+	if (chunk_size != 0) {
+		// Read chunk content
+		std::string chunk_content(chunk_size, ' ');
+		ss.read(&chunk_content[0], chunk_size);
+		content += chunk_content;
+
+		if (create_file(_request->get_real_path(), content) == 0)
+			_code = 204;
+		else
+			_code = 404;
+	}
+	else
+		_code = 400;
+
+	// Ignore the CRLF after chunk content
+	//ss.ignore(2);
+    //}
 	//std::cout << "method put" << std::endl;
-	//std::cout << "content: " << _request->get_content() << std::endl;
-	std::cout << _request->get_content().size() << std::endl;
+	//std::cout << content.size() << std::endl;
+	//std::cout << "content: " << content << std::endl;
 }
 
 void	Response::_construct( void ) {
@@ -163,9 +198,9 @@ void	Response::_construct( void ) {
 		_construct_error(HTTP::METHOD_NOT_ALLOWED);
 	else if (_request->get_real_path().empty()) {
 		_construct_error(HTTP::NOT_FOUND);
-		std::cout << "real_path: " << _request->get_real_path() << std::endl;
-		std::cout << "virtual_path: " << _request->get_virtual_path() << std::endl;
-		std::cout << "location_name: " << _request->get_location()->get_name() << std::endl;
+		//std::cout << "real_path: " << _request->get_real_path() << std::endl;
+		//std::cout << "virtual_path: " << _request->get_virtual_path() << std::endl;
+		//std::cout << "location_name: " << _request->get_location()->get_name() << std::endl;
 	}
 	else if (_request->get_method() == "DELETE")
 		_construct_delete();

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 18:16:41 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 13:57:29 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 19:11:47 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,13 +127,13 @@ std::string read_file( const std::string & path ) {
 	return content;
 }
 
-void	create_file( const std::string & file_name, const std::string & content ) {
+int	create_file( const std::string & file_name, const std::string & content ) {
 	
 	std::ofstream file(file_name.c_str());
 
 	if (!file.is_open()) {
-		std::cerr << ERROR << "[Utils.cpp] createFileFromString() : can't open " << file_name << " : " << strerror(errno) << std::endl;
-		return;
+		std::cerr << ERROR << "[Utils.cpp] create_file() : can't open " << file_name << " : " << strerror(errno) << std::endl;
+		return 1;
 	}
 
 	try {
@@ -142,9 +142,23 @@ void	create_file( const std::string & file_name, const std::string & content ) {
 	} catch ( const std::exception & e ) {
 		file.close();
 		std::remove(file_name.c_str());
-		std::cerr << ERROR << "[Utils.cpp] createFileFromString() : can't write on " << file_name << " : " << e.what() << std::endl;
-		throw;
+		std::cerr << ERROR << "[Utils.cpp] create_file() : can't write on " << file_name << " : " << e.what() << std::endl;
+		return 1;
 	}
+	return 0;
+}
+
+bool is_string_greater_than_int_max( const std::string & number_string ) {
+
+    const std::string int_max_string = "2147483647"; // Valeur maximale d'un int en C++98
+	
+    if (number_string.length() > int_max_string.length()) {
+        return true;
+    } else if (number_string.length() < int_max_string.length()) {
+        return false;
+    } else {
+        return number_string > int_max_string;
+    }
 }
 
 } // namespace HTTP

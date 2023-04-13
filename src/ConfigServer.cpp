@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/12 18:16:11 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 19:19:46 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@
 
 namespace HTTP {
 
-ConfigServer::ConfigServer( void ) : _host("localhost"), _port(80), _body_limit(1980) {
+ConfigServer::ConfigServer( void ) : _host("localhost"), _port(80), _body_limit(INT_MAX) {
 	return ;
 }
 
-ConfigServer::ConfigServer( const std::string & host, const int & port, const std::string & error_path ) : _body_limit(1980) {
+ConfigServer::ConfigServer( const std::string & host, const int & port, const std::string & error_path ) : _body_limit(INT_MAX) {
 	set_host(host);
 	set_port(port);
 	set_error_path(error_path);
@@ -99,10 +99,13 @@ void	ConfigServer::set_body_limit( const std::string & body_limit ) {
 	if (extension == 'M' || extension == 'K')
 		num = body_limit.substr(0, body_limit.size() - 1);
 	else
-		num = body_limit.substr(0, body_limit.size());
+		num = body_limit;
 
 	if (num.empty() || !is_number(num))
 		throw std::invalid_argument("[ConfigServer.cpp] wrong body_limit");
+	
+	if (is_string_greater_than_int_max(num))
+		throw std::invalid_argument("[ConfigServer.cpp] body_limit greather than INT_MAX");
 
 	if (extension == 'M')
 		_body_limit = atoi(num.c_str()) * 1000000;
@@ -110,8 +113,8 @@ void	ConfigServer::set_body_limit( const std::string & body_limit ) {
 		_body_limit = atoi(num.c_str()) * 1000;
 
 	if (_body_limit < 2)
-		throw std::invalid_argument("[ConfigServer.cpp] body must be larger than 1Ko");
-	//std::cout << _body_limit << std::endl;
+		throw std::invalid_argument("[ConfigServer.cpp] body_limit must be larger than 2");
+	//std::cout << "body_limit: " << _body_limit << std::endl;
 	return ;
 }
 

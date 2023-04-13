@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 13:58:38 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/13 20:18:06 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 namespace HTTP {
 
 Request::Request( ConfigServer * config, const int & client_socket ) : _config(config) {
-	std::string buff = _read(client_socket);
-	//std::cout << buff << std::endl;
+	std::string buff = _read_socket(client_socket);
+	//std::cout << "buff:" << buff << std::endl;
 	_construct(buff);
 	return ;
 }
@@ -140,7 +140,7 @@ std::string	Request::get_content( void ) const {
 
 // FUNCTIONS
 
-std::string	Request::_read( const int & client_socket ) const {
+std::string	Request::_read_socket( const int & client_socket ) const {
 
 	char				buffer[BUFF_SIZE];
 	ssize_t				bytes_read;
@@ -148,8 +148,15 @@ std::string	Request::_read( const int & client_socket ) const {
 	std::stringstream	ss;
 
 	while((bytes_read = recv(client_socket, buffer, BUFF_SIZE, 0)) > 0) {
+		
 		total_bytes += int(bytes_read);
-		if (bytes_read == (ssize_t)-1 || total_bytes >= _config->get_body_limit()) {
+
+		if (bytes_read == (ssize_t)-1) {
+			std::cerr << ERROR << "[Request.cpp] _read_socket() : can't reading from socket" << std::endl;
+			break;
+		}
+		else if (total_bytes >= _config->get_body_limit()) {
+			std::cerr << ERROR << "[Response.cpp] _read_socket() : body size > body limit" << std::endl;
 			break;
 		}
 		std::string	string(buffer, bytes_read);
@@ -159,6 +166,29 @@ std::string	Request::_read( const int & client_socket ) const {
 	}
 	return ss.str();
 }
+
+/*
+std::string Request::_read_socket( const int & socket ) const {
+
+	const int MAX_BUFFER_SIZE = 1024;
+	char buffer[MAX_BUFFER_SIZE];
+	std::ostringstream stream;
+
+	int num_bytes;
+
+	do {
+		num_bytes = recv(socket, buffer, MAX_BUFFER_SIZE, 0);
+
+		if (num_bytes == -1) {
+			std::cerr << ERROR << "[Request.cpp] _read_socket() : " << strerror(errno) << std::endl;
+			return "";
+		} else if (num_bytes > 0) {
+			stream.write(buffer, num_bytes);
+		}
+	} while (num_bytes == MAX_BUFFER_SIZE);
+
+	return stream.str();
+}*/
 
 void	Request::_construct_header( const std::string & line ) {
 

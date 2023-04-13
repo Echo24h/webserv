@@ -6,7 +6,7 @@
 #    By: gborne <gborne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/27 16:29:59 by gborne            #+#    #+#              #
-#    Updated: 2023/04/11 16:03:14 by gborne           ###   ########.fr        #
+#    Updated: 2023/04/13 16:41:13 by gborne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,7 @@ NAME = webserv
 all: $(NAME)
 
 test:
-	./test/ubuntu_tester http://localhost:3000
+	./test/mac_tester http://localhost:3000
 
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
