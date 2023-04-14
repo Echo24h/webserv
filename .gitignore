@@ -1,6 +1,6 @@
 # Exec
 webserv
-client
+request
 
 # Valgrind
 *.dSYM
