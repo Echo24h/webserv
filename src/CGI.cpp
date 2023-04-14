@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 20:27:52 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/14 19:17:15 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ CGI::~CGI() { return ; }
 CGI &	CGI::operator=( const CGI & rhs ) {
 	_config = rhs._config;
 	_request = rhs._request;
+	_code = rhs._code;
 	return *this;
 }
 
@@ -49,7 +50,11 @@ void	CGI::_construct( void ) {
 
 	std::string	cgi_response = _exec();
 
-	if (_code < 400) {
+	if (cgi_response.find("Status: ", 0) == 0) {
+		_content = cgi_response;
+		_code = atoi(cgi_response.substr(8, 3).c_str());
+	}
+	else if (_code < 400) {
 		size_t	delim = cgi_response.find("\r\n\r\n");
 		std::vector<std::string>	tokens = split(cgi_response.substr(0, delim));
 		std::map<std::string, std::string>	header;
@@ -67,6 +72,37 @@ void	CGI::_construct( void ) {
 	else
 		_content = cgi_response;
 }
+
+/*void	CGI::_send_content( int fd, const std::string & content ) {
+	
+    const size_t chunk_size = 100000;
+    const char* buffer = &content[0];
+    size_t remaining_size = content.size();
+    ssize_t bytes_sent = 0;
+
+    std::cout << content.size() << std::endl;
+
+    int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+
+    char* tmp_buffer = new char[chunk_size];
+
+    while (remaining_size > 0) {
+        size_t bytes_to_send = std::min(remaining_size, chunk_size);
+        memcpy(tmp_buffer, buffer, bytes_to_send);
+        bytes_sent = write(fd, tmp_buffer, bytes_to_send);
+        if (bytes_sent == -1) {
+            std::cout << ERROR << "[CGI.cpp] write() : code " << errno << std::endl;
+            _code = HTTP::INTERNAL_SERVER_ERROR;
+			break;
+        }
+        remaining_size -= bytes_sent;
+        buffer += bytes_sent;
+        std::cout << "send_content: " << bytes_sent << std::endl;
+    }
+
+    delete[] tmp_buffer;
+}*/
 
 std::string	CGI::_exec( void ) {
 
@@ -154,26 +190,68 @@ std::string	CGI::_exec( void ) {
 
 		int status;
 
+		std::cout << "write" << std::endl;
+
 		//if request want to upload file
-		std::string	req_content = _request->get_content();
-		if (!req_content.empty())
-			write(fd[1], req_content.c_str(), req_content.size());
+		if (!_request->get_content().empty()) {
+
+			std::stringstream ss;
+			/*ss << _request->get_method() << " " << _request->get_virtual_path() << " " << _request->get_version() << "\r\n";
+			ss << "Host: " << _request->get_ressource("Host") << "\r\n";
+			ss << "Content-Type: " << _request->get_ressource("Content-Type") << "\r\n";
+			if (!_request->get_content().empty())
+				ss << "Content-Length: " << itoa(_request->get_content().size()) << "\r\n";
+			ss << "\r\n";*/
+
+			ss << _request->get_content();
+
+			std::string request = ss.str();
+
+			//std::cout << "request: " << request << std::endl;
+
+			//_send_content(fd[1], request);
+			//int flags = fcntl(fd[1], F_GETFL, 0);
+    		//fcntl(fd[1], F_SETFL, flags | O_NONBLOCK);
+
+			std::cout << "request.size(): " << (int)request.size() << std::endl;
+			
+			size_t bytes_send = write(fd[1], request.c_str(), request.size());
+
+			std::cout << "bytes_send: " << (int)bytes_send << std::endl;
+			
+			if (bytes_send == (size_t)-1 || bytes_send != request.size()) {
+				std::cout << ERROR << "[CGI.cpp] write() : code " << errno << std::endl;
+            	_code = HTTP::INTERNAL_SERVER_ERROR;
+			}
+		}
+
+		std::cout << "write2" << std::endl;
 
 		close(fd[1]);
 
-		if (waitpid(pid, &status, 0) == -1) {
+		std::cout << "wait" << std::endl;
+		
+		if (_code >= 400 || waitpid(pid, &status, 0) == -1) {
+			kill(pid, SIGTERM);
 			close(fd[0]);
 			close(fd_err[0]);
 			_code = HTTP::INTERNAL_SERVER_ERROR;
 			return "CGI process fail";
 		}
+
+		std::cout << "wait2" << std::endl;
+		std::cout << "status: " << status << std::endl;
+		
 		if (status == 0) {
-			_code = HTTP::OK;
 			close(fd_err[0]);
+
+			std::cout << "_read" << std::endl;
 			cgi_response = _read(fd[0]);
+			std::cout << "_read2" << std::endl;
+			
 			if (cgi_response.empty())
 				_code = HTTP::INTERNAL_SERVER_ERROR;
-			//std::cout << cgi_response << std::endl;
+			std::cout << "response: " << cgi_response << std::endl;
 			close(fd[0]);
 		}
 		else {
@@ -215,7 +293,21 @@ char **	CGI::_generate_env( void ) const {
 
 	std::map<std::string, std::string> env;
 
-	env["REDIRECT_STATUS"] = "200";
+	// YoupiBanane/youpi.bla
+	// /YoupiBanane/youpi.bla
+	// /youpi.bla
+	// youpi.bla
+	// ""
+	// /directory/youpi.bla (get_virtual_path())
+	// directory/youpi.bla
+	// www/YoupiBanane/youpi.bla (get_real_path())
+	// /www/YoupiBanane/youpi.bla
+	// /home/gborne/Bureau/webserv/www/YoupiBanane/youpi.bla
+	// /home/gborne/Bureau/webserv/YoupiBanane/youpi.bla
+	// YoupiBanane/youpi.bla
+	// /YoupiBanane/youpi.bla
+
+	//env["PATH_INFO"] = get_current_dir() + "/" + _request->get_real_path();
 
 	// Server
 	env["SERVER_SOFTWARE"] = "webserv/1.0";
@@ -226,11 +318,19 @@ char **	CGI::_generate_env( void ) const {
 	env["SERVER_PROTOCOL"] = _request->get_version();
 	env["SERVER_PORT"] = itoa(_config->get_port());
 	env["REQUEST_METHOD"] = _request->get_method();
-	env["PATH_INFO"] = get_current_dir() + "/" + _request->get_real_path();
-	env["PATH_TRANSLATED"] = _request->get_real_path();
+
+	env["PATH_INFO"] = _request->get_real_path();
+
+	//std::cout << "PATH_INFO: " << env["PATH_INFO"] << std::endl;
+
+	env["PATH_TRANSLATED"] = get_current_dir() + "/" + _request->get_real_path();
+	//std::cout << "PATH_TRANSLATED: " << env["PATH_TRANSLATED"] << std::endl;
 	env["SCRIPT_NAME"] = _request->get_cgi();
-	//env["SCRIPT_FILENAME"] = _request->get_cgi();
-	env["QUERY_STRING"] = _request->get_query(); // var1=val1&var2=val2&...
+	//std::cout << "SCRIPT_NAME: " << env["SCRIPT_NAME"] << std::endl;
+	//env["SCRIPT_FILENAME"] = get_current_dir() + "/" + _request->get_cgi();
+	//std::cout << "SCRIPT_FILENAME: " << env["SCRIPT_FILENAME"] << std::endl;
+	if (!_request->get_query().empty())
+		env["QUERY_STRING"] = _request->get_query(); // var1=val1&var2=val2&...
 	//std::cout <<  _request->get_query() << std::endl;
 	//env["REMOTE_HOST"] = "";
 	env["REMOTE_ADDR"] = _request->get_client_ip();
@@ -238,12 +338,13 @@ char **	CGI::_generate_env( void ) const {
 	//env["REMOTE_USER"] = "";
 	//env["REMOTE_IDENT"] = "";
 	if (_request->get_method() == "POST") {
-		if (!_request->get_ressource("Content-Type").empty())
-			env["CONTENT_TYPE"] = _request->get_ressource("Content-Type");
-		if (!_request->get_ressource("Content-Length").empty())
-			env["CONTENT_LENGTH"] = _request->get_ressource("Content-Length");
+		env["CONTENT_TYPE"] = _request->get_ressource("Content-Type");
+		if (!_request->get_content().empty())
+			env["CONTENT_LENGTH"] = itoa(_request->get_content().size());
 	}
 
+	env["REDIRECT_STATUS"] = "200";
+	
 	// Client
 	env["HTTP_ACCEPT"] = _request->get_ressource("Accept");
 	env["HTTP_ACCEPT_LANGUAGE"] = _request->get_ressource("Accept-Language");
@@ -257,6 +358,7 @@ char **	CGI::_generate_env( void ) const {
 	int i = 0;
 	while (it != env.end()) {
 		std::string str = it->first + "=" + it->second;
+		std::cout << str << std::endl;
 		env_char[i] = strdup(str.c_str());
 		it++, i++;
 	}

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 13:17:05 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/11 15:35:00 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/14 15:33:44 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <unistd.h> //execve()
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <fcntl.h>
 
 # include "ConfigServer.hpp"
 # include "Request.hpp"
@@ -50,6 +51,8 @@ public:
 private:
 
 	// FUNCTIONS
+
+	void		_send_content( int fd, const std::string & content );
 
 	std::string	_exec( void );
 

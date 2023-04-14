@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 20:18:30 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/14 18:14:20 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,10 @@ std::string	Response::to_string( void ) const {
 	std::stringstream	ss;
 	std::string			response;
 
+	// POUR LES CGI QUI GERE LES ERREURS
+	if (_content.find("Status: ", 0) == 0)
+		return _content;
+
 	ss << "HTTP/1.1 " << itoa(_code) << "\r\n";
 	if (_request->get_method() != "DELETE") {
 		ss << "Content-Type: " << _type << "\r\n";
@@ -156,7 +160,7 @@ void	Response::_construct_put( void ) {
 	std::getline(ss, str);
 
 	try {
-		chunk_size = std::stoi(str, 0, 16);
+		chunk_size = static_cast<int>(strtol(str.c_str(), NULL, 16));
 	} catch ( const std::exception & e ) {
 		std::cerr << ERROR << "[Response.cpp] _construct_put() : Invalid chunk size" << std::endl;
 	}

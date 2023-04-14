@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 20:18:06 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/14 15:42:58 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,10 @@ namespace HTTP {
 
 Request::Request( ConfigServer * config, const int & client_socket ) : _config(config) {
 	std::string buff = _read_socket(client_socket);
-	//std::cout << "buff:" << buff << std::endl;
 	_construct(buff);
+	
+	// FOR DEBUG
+	create_file("test/last_request", _content);
 	return ;
 }
 
@@ -89,15 +91,15 @@ std::string	Request::get_real_path() const {
 				//	return std::string();
 				//}
 				else if (file_exist(_loc->get_root() + path) || _method == "PUT") {
-					return _loc->get_root() + path;
+					return remove_double_slashes(_loc->get_root() + path);
 				}
 				else if (file_exist(_loc->get_root() + path + "/" + _loc->get_index())) {
-					return _loc->get_root() + path + "/" + _loc->get_index();
+					return remove_double_slashes(_loc->get_root() + path + "/" + _loc->get_index());
 				}
 			}
 			else {
 				if (file_exist(_loc->get_root() + _loc->get_index())) {
-					return _loc->get_root() + _loc->get_index();
+					return remove_double_slashes(_loc->get_root() + _loc->get_index());
 				}
 			}
 		}

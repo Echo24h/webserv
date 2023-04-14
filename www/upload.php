@@ -52,7 +52,7 @@ if(isset($_POST["submit"])) {
 			}
 		}
 		else {
-			$session->setFlash("File is not an image.");
+			$session->setFlash("File is not an image or too big.");
 		}
 	}
 }

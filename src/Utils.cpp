@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 18:16:41 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 19:11:47 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/14 15:42:15 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,17 @@ bool is_string_greater_than_int_max( const std::string & number_string ) {
     } else {
         return number_string > int_max_string;
     }
+}
+
+std::string remove_double_slashes( const std::string & path ) {
+	
+	size_t pos = 0;
+	std::string new_path = path;
+
+	while ((pos = new_path.find("//", pos)) != std::string::npos) {
+		new_path.replace(pos, 2, "/");
+	}
+	return new_path;
 }
 
 } // namespace HTTP
