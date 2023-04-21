@@ -6,7 +6,7 @@
 #    By: gborne <gborne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/27 16:29:59 by gborne            #+#    #+#              #
-#    Updated: 2023/04/14 18:30:14 by gborne           ###   ########.fr        #
+#    Updated: 2023/04/21 09:26:10 by gborne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,9 +33,18 @@ NAME = webserv
 
 all: $(NAME)
 
+
+ifeq ($(shell uname), Darwin)
+# Instructions pour Mac
 test:
-	netstat -tlnp | grep 3001
-	./test/ubuntu_tester http://localhost:3001
+	./test/mac_tester http://localhost:8000
+else ifeq ($(shell uname), Linux)
+# Instructions pour Ubuntu
+test:
+	./test/ubuntu_tester http://localhost:3002
+else
+    $(error Unsupported operating system: $(shell uname))
+endif
 
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)

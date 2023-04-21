@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/14 15:42:58 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/21 09:28:19 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,10 @@ std::string	Request::get_ressource( const std::string & key ) const {
 
 std::string	Request::get_content( void ) const {
 	return _content;
+}
+
+std::string	Request::get_full_request( void ) const {
+	return _full_request;
 }
 
 // FUNCTIONS

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 00:10:36 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 19:12:42 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/21 09:02:55 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ public:
 
 	std::string	get_content( void ) const;
 
+	std::string get_full_request( void ) const;
+
 private:
 
 	std::string	_read_socket( const int & client_socket ) const;
@@ -83,6 +85,7 @@ private:
 	std::string	_version;
 	ressources	_ressources;
 	std::string	_content;
+	std::string _full_request;
 
 	ConfigServer *	_config;
 	ConfigLocation *		_loc;

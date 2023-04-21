@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 19:16:18 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 00:20:54 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,10 +140,14 @@ void	Server::run( void ) {
 
 	while(1) {
 
+		struct timeval timeout;
+		timeout.tv_sec = 0;
+		timeout.tv_usec = 10000; // 10 ms
+
 		//because select is destructor
 		ready_sockets = current_sockets;
 
-		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, NULL) < 0)
+		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, &timeout) < 0)
 			throw std::runtime_error("[Server.cpp] select() : " + std::string(strerror(errno)));
 
 		for (int i = 0; i <= max_socket_so_far; i++) {

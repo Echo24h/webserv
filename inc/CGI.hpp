@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 13:17:05 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/14 15:33:44 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/21 06:23:14 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <fcntl.h>
+# include <signal.h> // kill() for mac
 
 # include "ConfigServer.hpp"
 # include "Request.hpp"
