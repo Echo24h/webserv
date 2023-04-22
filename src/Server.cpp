@@ -93,7 +93,7 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
     socklen_t addrlen = sizeof(addr);
     getsockname(client_socket, (struct sockaddr *)&addr, &addrlen);
 
-	std::cout << YELLOW << "New connection" << DEF << std::endl;
+	std::cout << "\nNew connection" << DEF << std::endl;
 
 	HTTP::Request	request = Request(config, client_socket);
 

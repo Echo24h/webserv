@@ -70,11 +70,11 @@ public:
 
 private:
 
-	std::string	_read_socket( const int & client_socket ) const;
+	void		_construct_first_line( const std::string & line );
 
-	void		_construct_header( const std::string & line );
+	void 		_construct_header( const std::string & buff );
 
-	void		_construct( const std::string & buff );
+	void		_construct( const int & client_socket );
 
 	std::string	_method;
 	std::string	_virtual_path;

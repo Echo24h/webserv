@@ -15,11 +15,12 @@
 namespace HTTP {
 
 Request::Request( ConfigServer * config, const int & client_socket ) : _config(config) {
-	std::string buff = _read_socket(client_socket);
-	_construct(buff);
-	
+
+	// construit la requette avec des read sur le socket client
+	_construct(client_socket);
+
 	// FOR DEBUG
-	create_file("test/last_request", _content);
+	//create_file("test/last_request", _content);
 	return ;
 }
 
@@ -59,6 +60,7 @@ std::string	Request::get_virtual_path( void ) const {
 	return _virtual_path;
 }
 
+// Construit le chemin reel et retourne NULL si il n'existe pas
 std::string	Request::get_real_path() const {
 
 	// secure "../" access
@@ -69,17 +71,7 @@ std::string	Request::get_real_path() const {
 			std::string location_name = _loc->get_name();
 			size_t	start = location_name.size();
 
-			//std::cout << "_loc->get_name(): " << _loc->get_name() << std::endl;
-			//std::cout << "_virtual_path: " << _virtual_path << std::endl;
-			//std::cout << "_loc->get_root(): " << _loc->get_root() << std::endl;
-			//std::cout << "_loc->get_index(): " << _loc->get_index() << std::endl;
-
 			std::string path = _virtual_path.substr(start, _virtual_path.size() - start);
-
-			//std::cout << "path: " << path << std::endl;
-			//std::cout << "path.empty(): " << path.empty() << std::endl;
-			//std::cout << "_loc->get_root() + path: " << _loc->get_root() + path << std::endl;
-			//std::cout << "_loc->get_root() + _loc->get_index(): " << _loc->get_root() + _loc->get_index() << std::endl;
 
 			if (!path.empty()) {
 
@@ -146,67 +138,21 @@ std::string	Request::get_full_request( void ) const {
 
 // FUNCTIONS
 
-std::string	Request::_read_socket( const int & client_socket ) const {
-
-	char				buffer[BUFF_SIZE];
-	ssize_t				bytes_read;
-	int					total_bytes = 0;
-	std::stringstream	ss;
-
-	while((bytes_read = recv(client_socket, buffer, BUFF_SIZE, 0)) > 0) {
-		
-		total_bytes += int(bytes_read);
-
-		if (bytes_read == (ssize_t)-1) {
-			std::cerr << ERROR << "[Request.cpp] _read_socket() : can't reading from socket" << std::endl;
-			break;
-		}
-		else if (total_bytes >= _config->get_body_limit()) {
-			std::cerr << ERROR << "[Response.cpp] _read_socket() : body size > body limit" << std::endl;
-			break;
-		}
-		std::string	string(buffer, bytes_read);
-		ss << string;
-		// For secure losing data;
-		usleep(1000);
-	}
-	return ss.str();
-}
-
-/*
-std::string Request::_read_socket( const int & socket ) const {
-
-	const int MAX_BUFFER_SIZE = 1024;
-	char buffer[MAX_BUFFER_SIZE];
-	std::ostringstream stream;
-
-	int num_bytes;
-
-	do {
-		num_bytes = recv(socket, buffer, MAX_BUFFER_SIZE, 0);
-
-		if (num_bytes == -1) {
-			std::cerr << ERROR << "[Request.cpp] _read_socket() : " << strerror(errno) << std::endl;
-			return "";
-		} else if (num_bytes > 0) {
-			stream.write(buffer, num_bytes);
-		}
-	} while (num_bytes == MAX_BUFFER_SIZE);
-
-	return stream.str();
-}*/
-
-void	Request::_construct_header( const std::string & line ) {
+// Parse la premiere ligne de la requete HTTP
+void	Request::_construct_first_line( const std::string & line ) {
 
 	std::vector<std::string> tokens = split(line, " ");
 
 	if (tokens.size() == 3) {
 
+		// Root
 		_loc = _config->get_location(tokens[1]);
 
+		// Method
 		if (_loc->is_method(tokens[0]))
 			_method = tokens[0];
 
+		// Path & Query
 		if (_method == "GET" && tokens[1].find('?') != (size_t)-1) {
 			_query = tokens[1].substr(tokens[1].find('?') + 1, tokens[1].size() - tokens[1].find('?') - 1);
 			_virtual_path = tokens[1].substr(0, tokens[1].find('?'));
@@ -216,61 +162,38 @@ void	Request::_construct_header( const std::string & line ) {
 			_virtual_path = tokens[1];
 			_real_path = get_real_path();
 		}
+
+		// HTTP Version
 		_version = tokens[2];
 
+		// Verifie si CGI ou non
 		_cgi = _loc->get_cgi(get_extension(_real_path));
 	}
 }
 
-std::vector<std::string>	split_req( const std::string & buff ) {
+// Construit l'object avec le header de la request
+void Request::_construct_header( const std::string & buff ) {
 
-	std::vector<std::string>	request;
+	if (buff.size() > 0) {
 
-	size_t	delim = buff.find("\r\n\r\n");
-
-	request.push_back(buff.substr(0, delim));
-
-	request.push_back(buff.substr(delim + 4, buff.size() - (delim + 4)));
-
-	return request;
-}
-
-void	Request::_construct( const std::string & buff ) {
-
-	if (buff.empty())
-		return ;
-
-	std::map<std::string, std::string> tokens;
-
-	std::string			key;
-	std::string			value;
-
-	// separate body and header of request
-	std::vector<std::string> request = split_req(buff);
-
-	if (request.size() > 0) {
-
-		if (request.size() > 1)
-			_content = request.at(1);
-
-		std::vector<std::string> lines = split(request.at(0));
+		std::vector<std::string> lines = split(buff);
 
 		std::vector<std::string>::iterator	it = lines.begin();
 		std::vector<std::string>::iterator	ite = lines.end();
 
 		if (it != ite) {
 
-			// construct header
-			_construct_header(*it);
+			// construct Method, HTTP version, Path
+			_construct_first_line(*it);
 			it++;
 
-			// construct other lines
+			// construct ressources
 			while(it != ite) {
 
 				if (!it->empty() && it->find(": ") != (size_t)-1) {
 
-					key = get_key(*it, ": ");
-					value = get_value(*it, ": ");
+					std::string key = get_key(*it, ": ");
+					std::string value = get_value(*it, ": ");
 					if (!key.empty() & !value.empty())
 						_ressources.insert(std::make_pair(key, value));
 				}
@@ -281,6 +204,53 @@ void	Request::_construct( const std::string & buff ) {
 			}
 		}
 	}
+}
+
+// Read la requete et construit l'objet Request au fur et a mesure
+void Request::_construct( const int & client_socket ) {
+
+	char				buffer[BUFF_SIZE];
+	ssize_t				bytes_read;
+	std::stringstream	ss;
+
+	bool	is_header = true;
+
+	while((bytes_read = recv(client_socket, buffer, BUFF_SIZE, 0)) > 0) {
+
+		if (bytes_read == (ssize_t)-1) {
+			std::cerr << ERROR << "[Request.cpp] _construct() : can't reading from socket" << std::endl;
+			break;
+		}
+
+		std::string	buff(buffer, bytes_read);
+
+		// Construit le header
+		if(is_header) {
+
+			size_t	delim = buff.find("\r\n\r\n");
+
+			//std::cout << "request: " << buff << std::endl; 
+
+			if (delim == (size_t)-1) {
+				std::cerr << WARN << "[Request.cpp] _construct() : no delimiteur '\\r\\n\\r\\n' in request" << std::endl;
+				_construct_header(buff);
+				break;
+			}
+			_construct_header(buff.substr(0, delim));
+			if (delim > 0 && delim < buff.size())
+				ss << buff.substr(delim + 4, buff.size() - (delim + 4));
+			is_header = false;
+		}
+		// Ajoute pour le body
+		else
+			ss << buff;
+		usleep(1000);
+	}
+	if (ss.str().size() > (size_t)_config->get_body_limit())
+		std::cerr << ERROR << "[Response.cpp] _read_socket() : body size > body limit" << std::endl;
+	else
+		_content = ss.str();
+	return ;
 }
 
 std::ostream &	operator<<( std::ostream & o, Request const & rhs ) {

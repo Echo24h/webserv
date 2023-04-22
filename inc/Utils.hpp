@@ -34,7 +34,7 @@
 
 #define SUCCESS		"\033[1;32mSuccess \033[0m"
 #define ERROR		"\033[1;31mError \033[0m"
-#define WARNING		"\033[1;31mWarning \033[0m"
+#define WARN		"\033[1;33mWarn \033[0m"
 #define RECV		"\033[1;31m[<-] \033[0m"
 #define	SEND		"\033[1;32m[->] \033[0m"
 #define CONNECT		"\033[1;33mconnexion \033[0m"
