@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 00:20:54 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 18:35:14 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ Server &	Server::operator=( const Server & rhs ) {
 	return *this;
 }
 
+// Configure les ports et demarre l'ecoute
 void	Server::_setup_server( void ) {
 
 	Config::iterator	it = _config->begin();
@@ -38,12 +39,18 @@ void	Server::_setup_server( void ) {
 	while (it != ite) {
 
 		int server_socket;
+		int on = 1;
 
 		struct sockaddr_in address;
 		memset(&address, 0, sizeof(address));
 
 		if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 			throw std::runtime_error("[Server.cpp] socket() : " + std::string(strerror(errno)));
+
+		fcntl(server_socket, F_SETFL, O_NONBLOCK);
+
+		if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
+			throw std::runtime_error("[Server.cpp] setsockopt() : " + std::string(strerror(errno)));
 
 		address.sin_family = AF_INET;
 		address.sin_port = htons(it->get_port());
@@ -68,6 +75,7 @@ void	Server::_setup_server( void ) {
 
 }
 
+// Accept une connection client et configure le Socket
 int	Server::_accept_connection( const int & server_socket ) const {
 
 	int	client_socket;
@@ -86,6 +94,7 @@ int	Server::_accept_connection( const int & server_socket ) const {
 	return client_socket;
 }
 
+// Gère une connexion (recv() Request + send() Response)
 void	Server::_handle_connexion( const int & client_socket, ConfigServer * config ) const {
 
 	// On récupère les informations du client pour l'affichage dans la console
@@ -95,12 +104,15 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 
 	std::cout << "\nNew connection" << DEF << std::endl;
 
+	// L'objet Request lit la requette client et creer un objet
 	HTTP::Request	request = Request(config, client_socket);
 
 	std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
 
+	// L'objet client creer une reponse a partir de l'objet Request
 	HTTP::Response	response = Response(config, &request);
 
+	// On converti l'objet Response en string et on l'envoi
 	std::string	response_string = response.to_string();
 
 	if (response_string.empty())
@@ -122,9 +134,10 @@ void	Server::run( void ) {
 
 	std::map<int, ConfigServer *>	clients_config;
 
+	// Configure les ports et demarre l'ecoute
 	_setup_server();
 
-	// initialize my current set
+	// Initialise la liste des sockets
 	FD_ZERO(&current_sockets);
 
 	Server::listens::iterator	it = _listens.begin();
@@ -142,9 +155,9 @@ void	Server::run( void ) {
 
 		struct timeval timeout;
 		timeout.tv_sec = 0;
-		timeout.tv_usec = 10000; // 10 ms
+		timeout.tv_usec = 1000000; // 1000 ms
 
-		//because select is destructor
+		// Car select est destructeur
 		ready_sockets = current_sockets;
 
 		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, &timeout) < 0)
@@ -156,7 +169,8 @@ void	Server::run( void ) {
 				Server::listens::iterator it = _listens.find(i);
 
 				if (it != _listens.end()) {
-					//this is a new connection
+
+					// Nouvelle connexion, on l'ajoute a la liste des sockets
 					int client_socket = _accept_connection(it->first);
 					clients_config.insert(std::make_pair(client_socket, it->second));
 					FD_SET(client_socket, &current_sockets);
@@ -164,6 +178,8 @@ void	Server::run( void ) {
 						max_socket_so_far = client_socket;
 					}
 				} else {
+					
+					// On manage la connexion au socket et le supprime de notre liste
 					FD_CLR(i, &current_sockets);
 					_handle_connexion(i, clients_config.find(i)->second);
 					clients_config.erase(i);

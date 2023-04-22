@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/14 18:14:20 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 16:25:17 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,7 @@ std::string	Response::get_type( void ) const {
 	return ss.str();
 }*/
 
+// Converti l'objet Response en std::string pour être envoyé avec un write()
 std::string	Response::to_string( void ) const {
 
 	std::stringstream	ss;
@@ -99,6 +100,7 @@ std::string	Response::to_string( void ) const {
 	return response;
 }
 
+// Construit une Response d'erreur
 void	Response::_construct_error( const int & code, const std::string & msg ) {
 	_code = code;
 	if (!(_code >= 400 && _config->get_error_path().empty())) {
@@ -122,6 +124,7 @@ void	Response::_construct_error( const int & code, const std::string & msg ) {
 	return ;
 }
 
+// Construit une Response de CGI
 void	Response::_construct_cgi( void ) {
 
 	CGI	cgi(_config, _request);
@@ -137,6 +140,7 @@ void	Response::_construct_cgi( void ) {
 	}
 }
 
+// Execute et construit une response Delete
 void	Response::_construct_delete( void ) {
 	if (remove(_final_path.c_str()) == 0) {
 		_code = HTTP::NO_CONTENT;
@@ -146,6 +150,7 @@ void	Response::_construct_delete( void ) {
 	}
 }
 
+// Telecharge et construit une response Put
 void	Response::_construct_put( void ) {
 	
 	std::stringstream	ss(_request->get_content().c_str());
@@ -187,6 +192,7 @@ void	Response::_construct_put( void ) {
 	//std::cout << "content: " << content << std::endl;
 }
 
+// Construit la Response a partir de la Request
 void	Response::_construct( void ) {
 
 	_final_path = _request->get_real_path();

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 00:40:38 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 18:43:29 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,7 @@ std::string	CGI::_exec( void ) {
 		dup2(fd_error[1], STDERR_FILENO);
 		close(fd_error[1]);
 
-		if (execve(arg[0], NULL, env) == -1)
+		if (execve(arg[0], arg, env) == -1)
 			std::cerr << "CGI process fail: excve errno " << errno << std::endl;
 		exit(EXIT_FAILURE);
 	}

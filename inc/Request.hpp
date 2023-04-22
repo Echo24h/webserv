@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 00:10:36 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/21 09:02:55 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 18:42:03 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,13 @@ public:
 
 private:
 
+	void		_read_request( int sockfd, std::string & request_data );
+
 	void		_construct_first_line( const std::string & line );
 
 	void 		_construct_header( const std::string & buff );
+
+	void 		_construct_content( const std::string & buff );
 
 	void		_construct( const int & client_socket );
 

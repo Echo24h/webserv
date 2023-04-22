@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/21 09:28:19 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 19:10:25 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,52 +206,142 @@ void Request::_construct_header( const std::string & buff ) {
 	}
 }
 
-// Read la requete et construit l'objet Request au fur et a mesure
+int convertToInt(const std::string& str)
+{
+    std::stringstream ss(str);
+    int result;
+
+    // Tentative de conversion en décimal
+    ss >> result;
+
+    // Si la conversion a échoué, on essaye en hexadécimal
+    if (ss.fail()) {
+        ss.clear();
+        ss.str(str);
+        ss >> std::hex >> result;
+    }
+
+	if (ss.fail())
+		return -1;
+
+    return result;
+}
+
+// Construit l'object avec le content de la request
+void Request::_construct_content( const std::string & buff ) {
+
+	// Pour les requettes fragementées
+	if (get_ressource("Content-Length").empty()) {
+		
+		int content_length = 0;
+
+		std::stringstream ss(buff);
+
+		std::string line;
+
+		while (std::getline(ss, line)) {
+
+			std::cout << line << std::endl;
+
+			int bytes = convertToInt(line.c_str());
+			
+			if (bytes == 0)
+				break;
+			else if (bytes == -1) {
+				 std::cerr << ERROR << "[Request.cpp] _construct_content() : wrong format fragment request" << std::endl;
+				return;
+			}
+
+			std::getline(ss, line);
+
+			std::cout << line << std::endl;
+
+			_content += line;
+			content_length += bytes;
+
+		}
+		_ressources.insert(std::make_pair("Content-Length", itoa(content_length)));
+	}
+	// Pour les requettes non fragementées
+	else
+		_content = buff;
+
+}
+
+void	Request::_read_request( int sockfd, std::string & request_data ) {
+	
+    char buffer[BUFF_SIZE];
+
+    while (true) {
+        memset(buffer, 0, BUFF_SIZE);
+        int bytes_received = recv(sockfd, buffer, BUFF_SIZE, 0);
+
+        if (bytes_received < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // Le socket est en mode non-bloquant et il n'y a plus de données à lire
+                break;
+            } else {
+                std::cerr << ERROR << "[Request.cpp] read_request() : can't reading from socket" << std::endl;
+                break;
+            }
+        }
+
+        if (bytes_received == 0) {
+            // Le socket a été fermé
+            break;
+        }
+
+        request_data.append(buffer, bytes_received);
+		usleep(2000);
+    }
+
+    std::cout << "Received " << request_data.length() << " bytes " << std::endl;
+    //std::cout << request_data << std::endl;
+}
+
+// Read la requete du client et construit l'objet Request au fur et a mesure
 void Request::_construct( const int & client_socket ) {
 
-	char				buffer[BUFF_SIZE];
-	ssize_t				bytes_read;
-	std::stringstream	ss;
+	std::string			request_data;
 
-	bool	is_header = true;
+	_read_request(client_socket, request_data);
 
-	while((bytes_read = recv(client_socket, buffer, BUFF_SIZE, 0)) > 0) {
+	size_t	delim = request_data.find("\r\n\r\n");
 
-		if (bytes_read == (ssize_t)-1) {
-			std::cerr << ERROR << "[Request.cpp] _construct() : can't reading from socket" << std::endl;
-			break;
-		}
-
-		std::string	buff(buffer, bytes_read);
-
-		// Construit le header
-		if(is_header) {
-
-			size_t	delim = buff.find("\r\n\r\n");
-
-			//std::cout << "request: " << buff << std::endl; 
-
-			if (delim == (size_t)-1) {
-				std::cerr << WARN << "[Request.cpp] _construct() : no delimiteur '\\r\\n\\r\\n' in request" << std::endl;
-				_construct_header(buff);
-				break;
-			}
-			_construct_header(buff.substr(0, delim));
-			if (delim > 0 && delim < buff.size())
-				ss << buff.substr(delim + 4, buff.size() - (delim + 4));
-			is_header = false;
-		}
-		// Ajoute pour le body
-		else
-			ss << buff;
-		usleep(1000);
+	if (delim == (size_t)-1) {
+		_construct_header(request_data);
+		if (_method == "POST" || _method == "PUT")
+			std::cerr << WARN << "[Request.cpp] _construct() : end of head '\\r\\n\\r\\n' not found" << std::endl;
 	}
-	if (ss.str().size() > (size_t)_config->get_body_limit())
-		std::cerr << ERROR << "[Response.cpp] _read_socket() : body size > body limit" << std::endl;
-	else
-		_content = ss.str();
-	return ;
+	else {
+		_construct_header(request_data.substr(0, delim));
+		_construct_content(request_data.substr(delim + 4, request_data.size() - (delim + 4)));
+	}
 }
+/*
+void process_request(int sockfd) {
+    char buffer[BUFFER_SIZE];
+    std::string request_data;
+
+    while (true) {
+        memset(buffer, 0, BUFFER_SIZE);
+        int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+
+        if (bytes_received < 0) {
+            std::cerr << "Error receiving data from socket" << std::endl;
+            break;
+        }
+
+        if (bytes_received == 0) {
+            break;
+        }
+
+        request_data.append(buffer, bytes_received);
+    }
+
+    std::cout << "Received " << request_data.length() << " bytes: " << std::endl;
+    std::cout << request_data << std::endl;
+}*/
 
 std::ostream &	operator<<( std::ostream & o, Request const & rhs ) {
 	o << rhs.get_method() << " ";
