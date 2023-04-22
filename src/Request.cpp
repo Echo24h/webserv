@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 19:10:25 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 23:14:19 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,6 +176,8 @@ void Request::_construct_header( const std::string & buff ) {
 
 	if (buff.size() > 0) {
 
+		std::cout << buff << std::endl;
+
 		std::vector<std::string> lines = split(buff);
 
 		std::vector<std::string>::iterator	it = lines.begin();
@@ -194,7 +196,7 @@ void Request::_construct_header( const std::string & buff ) {
 
 					std::string key = get_key(*it, ": ");
 					std::string value = get_value(*it, ": ");
-					if (!key.empty() & !value.empty())
+					if (!key.empty() && !value.empty())
 						_ressources.insert(std::make_pair(key, value));
 				}
 				else if (_method == "POST") {
@@ -206,25 +208,22 @@ void Request::_construct_header( const std::string & buff ) {
 	}
 }
 
-int convertToInt(const std::string& str)
+int get_chunk_size(const std::string& str)
 {
     std::stringstream ss(str);
     int result;
 
-    // Tentative de conversion en décimal
-    ss >> result;
-
-    // Si la conversion a échoué, on essaye en hexadécimal
-    if (ss.fail()) {
-        ss.clear();
-        ss.str(str);
-        ss >> std::hex >> result;
-    }
-
-	if (ss.fail())
-		return -1;
-
-    return result;
+	if (is_number(str))
+		return atoi(str.c_str());
+	else {
+		try {
+		result = static_cast<int>(strtol(str.c_str(), NULL, 16));
+		} catch ( const std::exception & e ) {
+			std::cerr << ERROR << "[Response.cpp] _construct_put() : Invalid chunk size" << std::endl;
+			return -1;
+		}
+	}
+	return result;
 }
 
 // Construit l'object avec le content de la request
@@ -241,10 +240,10 @@ void Request::_construct_content( const std::string & buff ) {
 
 		while (std::getline(ss, line)) {
 
-			std::cout << line << std::endl;
+			int bytes = get_chunk_size(line.c_str());
 
-			int bytes = convertToInt(line.c_str());
-			
+			//std::cout << "bytes: " << bytes << std::endl;
+
 			if (bytes == 0)
 				break;
 			else if (bytes == -1) {
@@ -254,18 +253,20 @@ void Request::_construct_content( const std::string & buff ) {
 
 			std::getline(ss, line);
 
-			std::cout << line << std::endl;
-
-			_content += line;
+			_content += line.substr(0, bytes);
 			content_length += bytes;
 
 		}
 		_ressources.insert(std::make_pair("Content-Length", itoa(content_length)));
+
+		//std::cout << "content_length: " << content_length << std::endl;
+		//std::cout << "content_size: " << _content.size() << std::endl;
 	}
 	// Pour les requettes non fragementées
 	else
 		_content = buff;
 
+	
 }
 
 void	Request::_read_request( int sockfd, std::string & request_data ) {

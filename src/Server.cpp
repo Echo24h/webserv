@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 18:35:14 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 19:28:22 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 	HTTP::Response	response = Response(config, &request);
 
 	// On converti l'objet Response en string et on l'envoi
+
 	std::string	response_string = response.to_string();
 
 	if (response_string.empty())

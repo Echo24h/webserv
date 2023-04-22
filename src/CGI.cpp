@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 18:43:29 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 22:22:37 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,15 +130,26 @@ std::string	CGI::_exec( void ) {
         return "Failed to create pipe";
     }
 
+	std::cout << "ICI1: " << _request->get_content().size() << std::endl;
+	
 	// On envoie le body de la requete pour le CGI
-	size_t bytes_send = write(fd_request[1], _request->get_content().c_str(), _request->get_content().size());
-	close(fd_request[1]);
-
-	if (bytes_send == (size_t)-1 || bytes_send != _request->get_full_request().size()) {
+	size_t bytes_send = 0;
+	
+	if (_request->get_content().size() > 8000) {
+		// Ecriture en plusieurs fois
+		bytes_send = write(fd_request[1], _request->get_content().c_str(), 8000);
+	}
+	else {
+		bytes_send = write(fd_request[1], _request->get_content().c_str(), _request->get_content().size());
+		close(fd_request[1]);
+	}
+	
+	if (bytes_send == (size_t)-1) {
 		std::cout << ERROR << "[CGI.cpp] write() : code " << errno << std::endl;
 		_code = HTTP::INTERNAL_SERVER_ERROR;
 	}
 
+	
 	int	pid = fork();
 
 	if (pid == -1) {
@@ -169,6 +180,34 @@ std::string	CGI::_exec( void ) {
 		close(fd_response[1]);
 		close(fd_error[1]);
 		close(fd_request[0]);
+
+		if (_request->get_content().size() > 8000) {
+			// Ecriture en plusieurs fois
+
+			int remaining = _request->get_content().size() - bytes_send;
+			
+			while (bytes_send < _request->get_content().size()) {
+
+				std::cout << "new send" << std::endl;
+
+				int bytesToWrite = std::min(8000, remaining);
+
+				int bytesWritten = write(fd_request[1], _request->get_content().c_str(), bytesToWrite);
+
+				 if (bytesWritten < 0) {
+					// erreur d'écriture, retourner l'erreur
+					std::cout << ERROR << "[CGI.cpp] write() (large content) : code " << errno << std::endl;
+					_code = HTTP::INTERNAL_SERVER_ERROR;
+					break;
+				}
+				remaining -= bytesWritten;
+				bytes_send += bytesWritten;
+				std::cout << bytes_send << std::endl;
+			}
+			close(fd_request[1]);
+		}
+
+		std::cout << "write finish" << std::endl;
 
 		int status = 0;
 

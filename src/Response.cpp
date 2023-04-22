@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 16:25:17 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 19:36:54 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,44 +152,11 @@ void	Response::_construct_delete( void ) {
 
 // Telecharge et construit une response Put
 void	Response::_construct_put( void ) {
-	
-	std::stringstream	ss(_request->get_content().c_str());
-	//std::cout << _request->get_content() << std::endl;
-	int					chunk_size;
-	std::string			str;
-	std::string			content;
 
-	//while (true) {
-        // Read chunk size in hex
-
-	std::getline(ss, str);
-
-	try {
-		chunk_size = static_cast<int>(strtol(str.c_str(), NULL, 16));
-	} catch ( const std::exception & e ) {
-		std::cerr << ERROR << "[Response.cpp] _construct_put() : Invalid chunk size" << std::endl;
-	}
-
-	if (chunk_size != 0) {
-		// Read chunk content
-		std::string chunk_content(chunk_size, ' ');
-		ss.read(&chunk_content[0], chunk_size);
-		content += chunk_content;
-
-		if (create_file(_request->get_real_path(), content) == 0)
-			_code = 204;
-		else
-			_code = 404;
-	}
+	if (create_file(_request->get_real_path(), _request->get_content()) == 0)
+		_code = 204;
 	else
-		_code = 400;
-
-	// Ignore the CRLF after chunk content
-	//ss.ignore(2);
-    //}
-	//std::cout << "method put" << std::endl;
-	//std::cout << content.size() << std::endl;
-	//std::cout << "content: " << content << std::endl;
+		_code = 404;
 }
 
 // Construit la Response a partir de la Request

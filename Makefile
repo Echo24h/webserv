@@ -6,7 +6,7 @@
 #    By: gborne <gborne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/27 16:29:59 by gborne            #+#    #+#              #
-#    Updated: 2023/04/22 16:50:20 by gborne           ###   ########.fr        #
+#    Updated: 2023/04/22 22:57:02 by gborne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,7 +41,7 @@ test:
 else ifeq ($(shell uname), Linux)
 # Instructions pour Ubuntu
 test:
-	./test/ubuntu_tester http://localhost:3001
+	./test/ubuntu_tester http://localhost:8000
 else
     $(error Unsupported operating system: $(shell uname))
 endif

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/14 15:41:42 by gborne           ###   ########.fr       */
+/*   Updated: 2023/04/22 20:28:21 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,8 @@ int							create_file( const std::string & file_name, const std::string & conten
 bool						is_string_greater_than_int_max( const std::string & number_string );
 
 std::string					remove_double_slashes( const std::string & path );
+
+ssize_t						writeLargeString( int fd, const std::string & str );
 
 } // namespace HTTP
 
