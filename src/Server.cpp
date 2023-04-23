@@ -154,14 +154,11 @@ void	Server::run( void ) {
 
 	while(1) {
 
-		struct timeval timeout;
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 1000000; // 1000 ms
 
 		// Car select est destructeur
 		ready_sockets = current_sockets;
 
-		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, &timeout) < 0)
+		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, NULL) < 0)
 			throw std::runtime_error("[Server.cpp] select() : " + std::string(strerror(errno)));
 
 		for (int i = 0; i <= max_socket_so_far; i++) {

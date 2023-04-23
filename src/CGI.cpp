@@ -76,6 +76,8 @@ void	CGI::_construct( void ) {
 	}
 	else
 		_content = cgi_response;
+
+	std::cout << "content: "<< _content << std::endl;
 }
 
 // Execute et retourne la reponse du CGI
@@ -108,53 +110,25 @@ std::string	CGI::_exec( void ) {
 	arg[1] = strdup(_request->get_real_path().c_str());
 	arg[2] = NULL;
 
-	int fd_request[2], fd_response[2], fd_error[2];
+	int fd_response[2], fd_error[2];
 
+	create_file(".tmp", _request->get_content());
+	
 	// On creer les pipes
-    if (pipe(fd_request) == -1) {
-        _code = HTTP::INTERNAL_SERVER_ERROR;
-        return "Failed to create pipe";
-    }
 	if (pipe(fd_response) == -1) {
-		close(fd_request[0]);
-        close(fd_request[1]);
         _code = HTTP::INTERNAL_SERVER_ERROR;
         return "Failed to create pipe";
     }
     if (pipe(fd_error) == -1) {
-        close(fd_request[0]);
-        close(fd_request[1]);
 		close(fd_response[0]);
         close(fd_response[1]);
         _code = HTTP::INTERNAL_SERVER_ERROR;
         return "Failed to create pipe";
     }
-
-	std::cout << "ICI1: " << _request->get_content().size() << std::endl;
-	
-	// On envoie le body de la requete pour le CGI
-	size_t bytes_send = 0;
-	
-	if (_request->get_content().size() > 8000) {
-		// Ecriture en plusieurs fois
-		bytes_send = write(fd_request[1], _request->get_content().c_str(), 8000);
-	}
-	else {
-		bytes_send = write(fd_request[1], _request->get_content().c_str(), _request->get_content().size());
-		close(fd_request[1]);
-	}
-	
-	if (bytes_send == (size_t)-1) {
-		std::cout << ERROR << "[CGI.cpp] write() : code " << errno << std::endl;
-		_code = HTTP::INTERNAL_SERVER_ERROR;
-	}
-
 	
 	int	pid = fork();
 
 	if (pid == -1) {
-		close(fd_request[0]);
-        close(fd_request[1]);
 		close(fd_response[0]);
         close(fd_response[1]);
 		close(fd_error[0]);
@@ -164,8 +138,17 @@ std::string	CGI::_exec( void ) {
 	else if (pid == 0) {
 		// On execute le CGI
 		close(fd_error[0]);
-		dup2(fd_request[0], STDIN_FILENO);
-		close(fd_request[0]);
+		close(fd_response[0]);
+		int fd_cache = open(".tmp", O_RDWR | O_CREAT | O_CLOEXEC | O_TRUNC, 0775);
+		if (fd_cache == -1) {
+			std::cerr << "CGI process fail: failed to open .cache file" << std::endl;
+			close(fd_response[1]);
+			close(fd_error[1]);
+			exit(EXIT_FAILURE);
+		}
+		lseek(fd_cache, 0, SEEK_SET);
+		dup2(fd_cache, STDIN_FILENO);
+		close(fd_cache);
 		dup2(fd_response[1], STDOUT_FILENO);
 		close(fd_response[1]);
 		dup2(fd_error[1], STDERR_FILENO);
@@ -179,35 +162,6 @@ std::string	CGI::_exec( void ) {
 		// On recupere et traite la reponse du CGI
 		close(fd_response[1]);
 		close(fd_error[1]);
-		close(fd_request[0]);
-
-		if (_request->get_content().size() > 8000) {
-			// Ecriture en plusieurs fois
-
-			int remaining = _request->get_content().size() - bytes_send;
-			
-			while (bytes_send < _request->get_content().size()) {
-
-				std::cout << "new send" << std::endl;
-
-				int bytesToWrite = std::min(8000, remaining);
-
-				int bytesWritten = write(fd_request[1], _request->get_content().c_str(), bytesToWrite);
-
-				 if (bytesWritten < 0) {
-					// erreur d'écriture, retourner l'erreur
-					std::cout << ERROR << "[CGI.cpp] write() (large content) : code " << errno << std::endl;
-					_code = HTTP::INTERNAL_SERVER_ERROR;
-					break;
-				}
-				remaining -= bytesWritten;
-				bytes_send += bytesWritten;
-				std::cout << bytes_send << std::endl;
-			}
-			close(fd_request[1]);
-		}
-
-		std::cout << "write finish" << std::endl;
 
 		int status = 0;
 
@@ -224,6 +178,7 @@ std::string	CGI::_exec( void ) {
 			close(fd_error[0]);
 			cgi_response = _read(fd_response[0]);
 			close(fd_response[0]);
+			//std::cout << cgi_response << std::endl;
 			if (cgi_response.empty())
 				_code = HTTP::INTERNAL_SERVER_ERROR;
 		}
@@ -275,7 +230,7 @@ char **	CGI::_generate_env( void ) const {
 
 	// Request
 	env["CONTENT_TYPE"] = _request->get_ressource("Content-Type");
-	env["CONTENT_LENGTH"] = itoa(_request->get_content().size());
+	env["CONTENT_LENGTH"] = _request->get_ressource("Content-Length");
 
 	env["REDIRECT_STATUS"] = "200";
 
@@ -306,7 +261,6 @@ char **	CGI::_generate_env( void ) const {
 	int i = 0;
 	while (it != env.end()) {
 		std::string str = it->first + "=" + it->second;
-		std::cout << str << std::endl;
 		env_char[i] = strdup(str.c_str());
 		it++, i++;
 	}
