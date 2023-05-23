@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 23:14:19 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 16:58:11 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ Request::~Request() {
 
 Request	& Request::operator=( Request const & rhs ) {
 	_method = rhs._method;
+	_full_request = rhs._full_request;
 	_virtual_path = rhs._virtual_path;
 	_real_path = rhs._real_path;
 	_cgi = rhs._cgi;
@@ -176,8 +177,6 @@ void Request::_construct_header( const std::string & buff ) {
 
 	if (buff.size() > 0) {
 
-		std::cout << buff << std::endl;
-
 		std::vector<std::string> lines = split(buff);
 
 		std::vector<std::string>::iterator	it = lines.begin();
@@ -273,50 +272,57 @@ void	Request::_read_request( int sockfd, std::string & request_data ) {
 	
     char buffer[BUFF_SIZE];
 
+	//fcntl(sockfd, F_SETFL, O_NONBLOCK);
+
+	int nb_block = 0;
+
     while (true) {
+		
         memset(buffer, 0, BUFF_SIZE);
+		
         int bytes_received = recv(sockfd, buffer, BUFF_SIZE, 0);
 
-        if (bytes_received < 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // Le socket est en mode non-bloquant et il n'y a plus de données à lire
-                break;
-            } else {
+        if (bytes_received == -1) {
+			
+			nb_block++;
+			
+            if ( errno != EAGAIN && errno != EWOULDBLOCK ) {
                 std::cerr << ERROR << "[Request.cpp] read_request() : can't reading from socket" << std::endl;
                 break;
-            }
+			}
+			if (nb_block > 10000) {
+				//std::cerr << ERROR << "[Request.cpp] read_request() : timeout reading from socket" << std::endl;
+				break;
+			}
+			
         }
-
-        if (bytes_received == 0) {
-            // Le socket a été fermé
-            break;
-        }
-
-        request_data.append(buffer, bytes_received);
-		usleep(2000);
-    }
-
-    std::cout << "Received " << request_data.length() << " bytes " << std::endl;
-    //std::cout << request_data << std::endl;
+		else {
+			nb_block = 0;
+			if (bytes_received == 0) {
+				// Le socket a été fermé
+				break;
+			}
+			else
+				request_data.append(buffer, bytes_received);
+		}
+	}
 }
 
 // Read la requete du client et construit l'objet Request au fur et a mesure
 void Request::_construct( const int & client_socket ) {
+	
+	_read_request(client_socket, _full_request);
 
-	std::string			request_data;
-
-	_read_request(client_socket, request_data);
-
-	size_t	delim = request_data.find("\r\n\r\n");
+	size_t	delim = _full_request.find("\r\n\r\n");
 
 	if (delim == (size_t)-1) {
-		_construct_header(request_data);
+		_construct_header(_full_request);
 		if (_method == "POST" || _method == "PUT")
 			std::cerr << WARN << "[Request.cpp] _construct() : end of head '\\r\\n\\r\\n' not found" << std::endl;
 	}
 	else {
-		_construct_header(request_data.substr(0, delim));
-		_construct_content(request_data.substr(delim + 4, request_data.size() - (delim + 4)));
+		_construct_header(_full_request.substr(0, delim));
+		_construct_content(_full_request.substr(delim + 4, _full_request.size() - (delim + 4)));
 	}
 }
 /*
@@ -347,7 +353,9 @@ void process_request(int sockfd) {
 std::ostream &	operator<<( std::ostream & o, Request const & rhs ) {
 	o << rhs.get_method() << " ";
 	o << rhs.get_virtual_path() << " ";
-	o << rhs.get_version();
+	o << rhs.get_version() << " ";
+	o << "[" << rhs.get_full_request().size() << "]" << std::endl;
+	o << YELLOW << "[" << rhs.get_full_request().substr(0, 300) << "]" << DEF << std::endl;
 	return o;
 }
 

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 19:28:22 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 15:54:43 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,8 +102,6 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
     socklen_t addrlen = sizeof(addr);
     getsockname(client_socket, (struct sockaddr *)&addr, &addrlen);
 
-	std::cout << "\nNew connection" << DEF << std::endl;
-
 	// L'objet Request lit la requette client et creer un objet
 	HTTP::Request	request = Request(config, client_socket);
 
@@ -116,13 +114,18 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 
 	std::string	response_string = response.to_string();
 
+	std::cout << response_string.size() << std::endl;
 	if (response_string.empty())
 		std::cerr << ERROR << "[Server.cpp] Empty response" << std::endl;
 	else {
-		std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << std::endl;
-
-		if (send(client_socket, response_string.c_str(), response_string.size(), 0) == -1)
+		size_t ret = sendBig(client_socket, response_string.c_str(), response_string.size());
+		if (ret == (size_t)-1)
 			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
+		else {
+			std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << " [" << ret << "]" << std::endl;
+			std::cout << GREEN << "[" << response_string.substr(0, 300).c_str() << "]" << DEF << std::endl;
+		}
+			
 	}
 	close(client_socket);
 }

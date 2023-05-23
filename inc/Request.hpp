@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 00:10:36 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 18:42:03 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 16:38:26 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 
 # include <sys/socket.h>
 # include <string.h>
+# include <fcntl.h>
 
 # include "ConfigServer.hpp"
 # include "Utils.hpp"

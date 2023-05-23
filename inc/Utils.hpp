@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 20:28:21 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 15:57:13 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 # include <sys/param.h> // MAXPATHLEN
 # include <sys/stat.h> // Vérif Dossier
 # include <cerrno>
+
+# include <sys/socket.h>
 
 #define	RED			"\033[1;31m"
 #define	GREEN		"\033[1;32m"
@@ -90,6 +92,8 @@ bool						is_string_greater_than_int_max( const std::string & number_string );
 std::string					remove_double_slashes( const std::string & path );
 
 ssize_t						writeLargeString( int fd, const std::string & str );
+
+ssize_t 					sendBig(int sockfd, const char * data, ssize_t size);
 
 } // namespace HTTP
 

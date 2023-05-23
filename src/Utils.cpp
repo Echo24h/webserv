@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 18:16:41 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 22:34:07 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 16:19:37 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,6 +170,37 @@ std::string remove_double_slashes( const std::string & path ) {
 		new_path.replace(pos, 2, "/");
 	}
 	return new_path;
+}
+
+ssize_t 					sendBig(int sockfd, const char * data, ssize_t size) {
+    // Initialisez les données selon vos besoins
+
+    int totalSent = 0;
+    int remaining = size;
+    int chunkSize = 10000;  // Taille de chaque morceau à envoyer
+
+	if (remaining < chunkSize)
+		chunkSize = remaining;
+
+    while (remaining > 0) {
+			
+        int bytesSent = send(sockfd, data + totalSent, chunkSize, 0);
+        if (bytesSent == -1) {
+            // Gestion de l'erreur d'envoi
+			if (errno != EAGAIN && errno != EWOULDBLOCK) {
+				std::cerr << ERROR << "[Utils.cpp] sendBig() : Erreur send() : " << strerror(errno) << std::endl;
+				break;
+			}
+        }
+
+        totalSent += bytesSent;
+        remaining -= bytesSent;
+
+		if (remaining < chunkSize)
+			chunkSize = remaining;
+		//usleep(2000);
+    }
+	return (ssize_t)totalSent;
 }
 
 } // namespace HTTP

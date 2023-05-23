@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 19:36:54 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 15:21:44 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,10 @@ std::string	Response::to_string( void ) const {
 
 	ss << "HTTP/1.1 " << itoa(_code) << "\r\n";
 	if (_request->get_method() != "DELETE") {
-		ss << "Content-Type: " << _type << "\r\n";
+		if (_type.empty())
+			ss << "Content-Type: " << "text/html; charset=utf-8" << "\r\n";
+		else
+			ss << "Content-Type: " << _type << "\r\n";
 		ss << "Content-Length: " << _content.size() << "\r\n";
 		ss << "Connection: keep-alive\r\n\r\n";
 		if (!(_code >= 400 && _config->get_error_path().empty()) && !_content.empty() && _code != 204)

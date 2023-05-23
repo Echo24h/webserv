@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/22 22:22:37 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 15:06:28 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,6 @@ void	CGI::_construct( void ) {
 	}
 	else
 		_content = cgi_response;
-
-	std::cout << "content: "<< _content << std::endl;
 }
 
 // Execute et retourne la reponse du CGI
@@ -110,85 +108,55 @@ std::string	CGI::_exec( void ) {
 	arg[1] = strdup(_request->get_real_path().c_str());
 	arg[2] = NULL;
 
-	int fd_response[2], fd_error[2];
+	int			saveStdin;
+	int			saveStdout;
 
-	create_file(".tmp", _request->get_content());
-	
-	// On creer les pipes
-	if (pipe(fd_response) == -1) {
-        _code = HTTP::INTERNAL_SERVER_ERROR;
-        return "Failed to create pipe";
-    }
-    if (pipe(fd_error) == -1) {
-		close(fd_response[0]);
-        close(fd_response[1]);
-        _code = HTTP::INTERNAL_SERVER_ERROR;
-        return "Failed to create pipe";
-    }
-	
+	// SAVING STDIN AND STDOUT IN ORDER TO TURN THEM BACK TO NORMAL LATER
+	saveStdin = dup(STDIN_FILENO);
+	saveStdout = dup(STDOUT_FILENO);
+
+	FILE	*fIn = tmpfile();
+	FILE	*fOut = tmpfile();
+	long	fdIn = fileno(fIn);
+	long	fdOut = fileno(fOut);
+
+	write(fdIn, _request->get_content().c_str(), _request->get_content().size());
+	lseek(fdIn, 0, SEEK_SET);
+
 	int	pid = fork();
 
 	if (pid == -1) {
-		close(fd_response[0]);
-        close(fd_response[1]);
-		close(fd_error[0]);
-		close(fd_error[1]);
 		_code = HTTP::INTERNAL_SERVER_ERROR;
+		return ("Status: 500\r\n\r\n");
 	}
 	else if (pid == 0) {
 		// On execute le CGI
-		close(fd_error[0]);
-		close(fd_response[0]);
-		int fd_cache = open(".tmp", O_RDWR | O_CREAT | O_CLOEXEC | O_TRUNC, 0775);
-		if (fd_cache == -1) {
-			std::cerr << "CGI process fail: failed to open .cache file" << std::endl;
-			close(fd_response[1]);
-			close(fd_error[1]);
-			exit(EXIT_FAILURE);
-		}
-		lseek(fd_cache, 0, SEEK_SET);
-		dup2(fd_cache, STDIN_FILENO);
-		close(fd_cache);
-		dup2(fd_response[1], STDOUT_FILENO);
-		close(fd_response[1]);
-		dup2(fd_error[1], STDERR_FILENO);
-		close(fd_error[1]);
 
-		if (execve(arg[0], arg, env) == -1)
-			std::cerr << "CGI process fail: excve errno " << errno << std::endl;
+		dup2(fdIn, STDIN_FILENO);
+		dup2(fdOut, STDOUT_FILENO);
+
+		execve(arg[0], arg, env);
+		std::cerr << "CGI process fail: excve errno " << errno << std::endl;
+		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
 		exit(EXIT_FAILURE);
 	}
 	else {
 		// On recupere et traite la reponse du CGI
-		close(fd_response[1]);
-		close(fd_error[1]);
+		waitpid(-1, NULL, 0);
+		lseek(fdOut, 0, SEEK_SET);
 
-		int status = 0;
-
-		if (_code >= 400 || waitpid(pid, &status, 0) == -1) {
-			std::cout << "wait2" << std::endl;
-			kill(pid, SIGTERM);
-			close(fd_response[0]);
-			close(fd_error[0]);
-			_code = HTTP::INTERNAL_SERVER_ERROR;
-			return "CGI process fail";
-		}
-
-		if (status == 0) {
-			close(fd_error[0]);
-			cgi_response = _read(fd_response[0]);
-			close(fd_response[0]);
-			//std::cout << cgi_response << std::endl;
-			if (cgi_response.empty())
-				_code = HTTP::INTERNAL_SERVER_ERROR;
-		}
-		else {
-			_code = HTTP::INTERNAL_SERVER_ERROR;;
-			close(fd_response[0]);
-			cgi_response = _read(fd_error[0]);
-			close(fd_error[0]);
-		}
+		cgi_response = _read(fdOut);
 	}
+
+	dup2(saveStdin, STDIN_FILENO);
+	dup2(saveStdout, STDOUT_FILENO);
+	fclose(fIn);
+	fclose(fOut);
+	close(fdIn);
+	close(fdOut);
+	close(saveStdin);
+	close(saveStdout);
+	
 	int	i = 0;
 	while(arg[i])
 		free(arg[i++]);
@@ -210,7 +178,7 @@ std::string	CGI::_read( const int & fd ) const {
 
 	while((bytes_read = read(fd, buffer, BUFF_SIZE)) != 0) {
 		if (bytes_read == (ssize_t)-1) {
-			return std::string();
+			break;
 		}
 		std::string	string(buffer, bytes_read);
 		ss << string;
@@ -261,6 +229,7 @@ char **	CGI::_generate_env( void ) const {
 	int i = 0;
 	while (it != env.end()) {
 		std::string str = it->first + "=" + it->second;
+		//std::cout << str << std::endl;
 		env_char[i] = strdup(str.c_str());
 		it++, i++;
 	}
