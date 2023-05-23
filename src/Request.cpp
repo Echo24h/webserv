@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 16:58:11 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 20:57:08 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ void	Request::_construct_first_line( const std::string & line ) {
 		_version = tokens[2];
 
 		// Verifie si CGI ou non
-		_cgi = _loc->get_cgi(get_extension(_real_path));
+		_cgi = _loc->get_cgi(get_extension(tokens[1]));
 	}
 }
 
@@ -270,7 +270,7 @@ void Request::_construct_content( const std::string & buff ) {
 
 void	Request::_read_request( int sockfd, std::string & request_data ) {
 	
-    char buffer[BUFF_SIZE];
+    char buffer[8000];
 
 	//fcntl(sockfd, F_SETFL, O_NONBLOCK);
 
@@ -278,15 +278,15 @@ void	Request::_read_request( int sockfd, std::string & request_data ) {
 
     while (true) {
 		
-        memset(buffer, 0, BUFF_SIZE);
+        memset(buffer, 0, 8000);
 		
-        int bytes_received = recv(sockfd, buffer, BUFF_SIZE, 0);
+        int bytes_received = recv(sockfd, buffer, 8000, 0);
 
         if (bytes_received == -1) {
 			
 			nb_block++;
 			
-            if ( errno != EAGAIN && errno != EWOULDBLOCK ) {
+            if ( errno != 11) {
                 std::cerr << ERROR << "[Request.cpp] read_request() : can't reading from socket" << std::endl;
                 break;
 			}
@@ -307,6 +307,34 @@ void	Request::_read_request( int sockfd, std::string & request_data ) {
 		}
 	}
 }
+
+/*void	Request::_read_request( int sockfd, std::string & request_data ) {
+	
+    char buffer[BUFF_SIZE];
+
+	fcntl(sockfd, F_SETFL, O_NONBLOCK);
+
+    while (true) {
+		
+        memset(buffer, 0, BUFF_SIZE);
+		
+        int bytes_received = recv(sockfd, buffer, BUFF_SIZE, 0);
+
+        if (bytes_received == -1) {
+			
+            break;
+        }
+		else {
+			if (bytes_received == 0) {
+				// Le socket a été fermé
+				break;
+			}
+			else
+				request_data.append(buffer, bytes_received);
+		}
+		usleep(1000);
+	}
+}*/
 
 // Read la requete du client et construit l'objet Request au fur et a mesure
 void Request::_construct( const int & client_socket ) {
@@ -354,8 +382,7 @@ std::ostream &	operator<<( std::ostream & o, Request const & rhs ) {
 	o << rhs.get_method() << " ";
 	o << rhs.get_virtual_path() << " ";
 	o << rhs.get_version() << " ";
-	o << "[" << rhs.get_full_request().size() << "]" << std::endl;
-	o << YELLOW << "[" << rhs.get_full_request().substr(0, 300) << "]" << DEF << std::endl;
+	o << "[" << rhs.get_full_request().size() << "]";
 	return o;
 }
 

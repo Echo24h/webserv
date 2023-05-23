@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 15:54:43 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 20:34:29 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,8 @@ int	Server::_accept_connection( const int & server_socket ) const {
 	return client_socket;
 }
 
+static int count = 0;
+
 // Gère une connexion (recv() Request + send() Response)
 void	Server::_handle_connexion( const int & client_socket, ConfigServer * config ) const {
 
@@ -105,7 +107,9 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 	// L'objet Request lit la requette client et creer un objet
 	HTTP::Request	request = Request(config, client_socket);
 
-	std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
+	//std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
+	if (config->get_debug() == true)
+		std::cout << YELLOW << "[" << request.get_full_request().substr(0, 300) << "]" << DEF << std::endl;
 
 	// L'objet client creer une reponse a partir de l'objet Request
 	HTTP::Response	response = Response(config, &request);
@@ -114,7 +118,9 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 
 	std::string	response_string = response.to_string();
 
-	std::cout << response_string.size() << std::endl;
+	//std::cout << response_string.size() << std::endl;
+	count++;
+	std::cout << count << std::endl;
 	if (response_string.empty())
 		std::cerr << ERROR << "[Server.cpp] Empty response" << std::endl;
 	else {
@@ -122,8 +128,9 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 		if (ret == (size_t)-1)
 			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
 		else {
-			std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << " [" << ret << "]" << std::endl;
-			std::cout << GREEN << "[" << response_string.substr(0, 300).c_str() << "]" << DEF << std::endl;
+			//std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << " [" << ret << "]" << std::endl;
+			if (config->get_debug() == true)
+				std::cout << GREEN << "[" << response_string.substr(0, 300).c_str() << "]" << DEF << std::endl;
 		}
 			
 	}

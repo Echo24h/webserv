@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:24:04 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/12 17:53:30 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 19:30:27 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,12 @@ Config::tokens::const_iterator Config::_trait_serv_loc( ConfigServer * server, C
 				throw std::invalid_argument("[Config.cpp] expected ';' at 'root' in file \"" + std::string(_path) + "\"");
 			location.set_root((*it).substr(0, (*it).length() - 1));
 		}
+		else if (*it == "body_limit") {
+			it++;
+			if (*(*it).rbegin() != ';')
+				throw std::invalid_argument("[Config.cpp] expected ';' at 'body_limit' in file \"" + std::string(_path) + "\"");
+			location.set_body_limit((*it).substr(0, (*it).length() - 1));
+		}
 		else if (*it == "cgi") {
 			std::string	key;
 			std::string	value;
@@ -172,6 +178,12 @@ Config::tokens::const_iterator Config::_trait_serv_param( ConfigServer * server,
 		if (*(*it).rbegin() != ';')
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'port' in file \"" + std::string(_path) + "\"");
 		server->set_port(atoi((*it).substr(0, (*it).length() - 1).c_str()));
+	}
+	else if (*it == "debug") {
+		it++;
+		if (*(*it).rbegin() != ';')
+			throw std::invalid_argument("[Config.cpp] expected ';' at 'port' in file \"" + std::string(_path) + "\"");
+		server->set_debug((*it).substr(0, (*it).length() - 1).c_str());
 	}
 	else if (*it == "server_name") {
 		it++;

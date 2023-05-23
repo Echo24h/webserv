@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 15:21:44 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 20:37:21 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,10 +82,6 @@ std::string	Response::to_string( void ) const {
 
 	std::stringstream	ss;
 	std::string			response;
-
-	// POUR LES CGI QUI GERE LES ERREURS
-	if (_content.find("Status: ", 0) == 0)
-		return _content;
 
 	ss << "HTTP/1.1 " << itoa(_code) << "\r\n";
 	if (_request->get_method() != "DELETE") {
@@ -172,11 +168,16 @@ void	Response::_construct( void ) {
 	//std::cout << "virtual_path: " << _request->get_virtual_path() << std::endl;
 	//std::cout << "location_name: " << _request->get_location()->get_name() << std::endl;
 
-	if (_request->get_version() != "HTTP/1.1")
+	//std::cout << _request->get_content().size() << std::endl;
+	//std::cout << (size_t)_request->get_location()->get_body_limit() << std::endl;
+	if (_request->get_content().size() > (size_t)_request->get_location()->get_body_limit())
+		_construct_error(HTTP::REQUEST_ENTITY_TOO_LARGE, "Request body size exceeds limit");
+	else if (_request->get_version() != "HTTP/1.1")
 		_construct_error(HTTP::HTTP_VERSION_NOT_SUPPORTED);
 	else if (_request->get_method().empty())
 		_construct_error(HTTP::METHOD_NOT_ALLOWED);
-	else if (_request->get_real_path().empty()) {
+	else if (_request->get_real_path().empty() && !_request->is_cgi() && _request->get_method() != "POST") {
+		//std::cout << ERROR << "ICI" << std::endl;
 		_construct_error(HTTP::NOT_FOUND);
 		//std::cout << "real_path: " << _request->get_real_path() << std::endl;
 		//std::cout << "virtual_path: " << _request->get_virtual_path() << std::endl;

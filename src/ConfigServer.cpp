@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/13 19:19:46 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 19:27:28 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@
 
 namespace HTTP {
 
-ConfigServer::ConfigServer( void ) : _host("localhost"), _port(80), _body_limit(INT_MAX) {
+ConfigServer::ConfigServer( void ) : _debug(false), _host("localhost"), _port(80), _body_limit(INT_MAX) {
 	return ;
 }
 
-ConfigServer::ConfigServer( const std::string & host, const int & port, const std::string & error_path ) : _body_limit(INT_MAX) {
+ConfigServer::ConfigServer( const std::string & host, const int & port, const std::string & error_path ) : _debug(false), _body_limit(INT_MAX) {
 	set_host(host);
 	set_port(port);
 	set_error_path(error_path);
@@ -35,6 +35,7 @@ ConfigServer::~ConfigServer( void ) {
 }
 
 ConfigServer & ConfigServer::operator=( ConfigServer const & rhs ) {
+	_debug = rhs._debug;
 	_host = rhs._host;
 	_port = rhs._port;
 	_server_name = rhs._server_name;
@@ -63,6 +64,11 @@ ConfigServer::const_iterator ConfigServer::end( void ) const {
 }
 
 // SETTERS
+
+void	ConfigServer::set_debug( const std::string & debug ) {
+	if (debug == "true")
+		_debug = true;
+}
 
 void	ConfigServer::set_host( const std::string & host ) {
 	if (host.empty())
@@ -126,6 +132,8 @@ void	ConfigServer::new_location( ConfigServer::location & location ) {
 // GETTERS
 
 //ConfigServer::cookies *	ConfigServer::get_cookies( void ) const { return _cookies; }
+
+bool					ConfigServer::get_debug( void ) const { return _debug; }
 
 std::string				ConfigServer::get_host( void ) const { return _host; }
 

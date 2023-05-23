@@ -6,7 +6,7 @@
 #    By: gborne <gborne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/27 16:29:59 by gborne            #+#    #+#              #
-#    Updated: 2023/05/20 17:05:26 by gborne           ###   ########.fr        #
+#    Updated: 2023/05/23 18:04:26 by gborne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -60,6 +60,6 @@ fclean: clean
 re: fclean $(NAME)
 
 leaks: all
-	valgrind ./$(NAME)
+	valgrind ./$(NAME) conf/tester_ubuntu.conf
 
 .PHONY: all clean fclean re leaks test

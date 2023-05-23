@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 15:57:13 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 19:09:49 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ enum Code {
 	NOT_FOUND = 404,
 	METHOD_NOT_ALLOWED = 405,
 	REQUEST_TIMEOUT = 408,
+	REQUEST_ENTITY_TOO_LARGE = 413,
 	UNSUPORTED_MEDIA_TYPE = 415,
 
 	INTERNAL_SERVER_ERROR = 500,

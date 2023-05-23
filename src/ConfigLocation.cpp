@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/11 19:37:23 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/12 18:14:12 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 19:30:42 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,11 @@ namespace HTTP {
 
 // CANONICAL FORM
 
-ConfigLocation::ConfigLocation( void ) {
+ConfigLocation::ConfigLocation( void ) : _body_limit(INT_MAX) {
 	return ; 
 }
 
-ConfigLocation::ConfigLocation( const ConfigLocation & src ) { *this = src; return ; }
+ConfigLocation::ConfigLocation( const ConfigLocation & src ) : _body_limit(INT_MAX) { *this = src; return ; }
 
 ConfigLocation::~ConfigLocation() { return ; }
 
@@ -31,6 +31,7 @@ ConfigLocation &	ConfigLocation::operator=( const ConfigLocation & rhs ) {
 	_root = rhs._root;
 	_params = rhs._params;
 	_cgi = rhs._cgi;
+	_body_limit = rhs._body_limit;
 	return *this;
 }
 
@@ -76,6 +77,35 @@ void	ConfigLocation::set_index( const std::string & index ) { _index = index; re
 
 void	ConfigLocation::set_root( const std::string & root ) { _root = root; return ; }
 
+void	ConfigLocation::set_body_limit( const std::string & body_limit ) {
+
+	char		extension = *body_limit.rbegin();
+	std::string	num;
+
+	if (extension == 'M' || extension == 'K')
+		num = body_limit.substr(0, body_limit.size() - 1);
+	else
+		num = body_limit;
+
+	if (num.empty() || !is_number(num))
+		throw std::invalid_argument("[ConfigServer.cpp] wrong body_limit");
+	
+	if (is_string_greater_than_int_max(num))
+		throw std::invalid_argument("[ConfigServer.cpp] body_limit greather than INT_MAX");
+
+	if (extension == 'M')
+		_body_limit = atoi(num.c_str()) * 1000000;
+	else if (extension == 'K')
+		_body_limit = atoi(num.c_str()) * 1000;
+	else
+		_body_limit = atoi(body_limit.c_str());
+
+	if (_body_limit < 2)
+		throw std::invalid_argument("[ConfigServer.cpp] body_limit must be larger than 2");
+	//std::cout << "body_limit: " << _body_limit << std::endl;
+	return ;
+}
+
 void	ConfigLocation::new_cgi( const std::string & extension, const std::string & path ) {
 	_cgi.insert(std::make_pair(extension, path));
 	return ;
@@ -92,6 +122,8 @@ std::string	ConfigLocation::get_index( void ) const { return _index; }
 std::string	ConfigLocation::get_root( void ) const { return _root; }
 
 std::string	ConfigLocation::get_params( void ) const { return _params; }
+
+int			ConfigLocation::get_body_limit( void ) const { return _body_limit; }
 
 ConfigLocation::cgi			ConfigLocation::get_cgis( void ) const { return _cgi; }
 
@@ -135,6 +167,7 @@ std::ostream &	operator<<( std::ostream & o, ConfigLocation const & rhs ) {
 	o << "	index   = " << rhs.get_index() << std::endl;
 	o << "	root    = " << rhs.get_root() << std::endl;
 	o << "	params  = " << rhs.get_params() << std::endl;
+	o << "	body_limit = " << rhs.get_body_limit() << std::endl;
 	o << "	cgi:" << std::endl;
 	ConfigLocation::cgi cgi = rhs.get_cgis();
 	ConfigLocation::cgi::const_iterator	it_c = cgi.begin();

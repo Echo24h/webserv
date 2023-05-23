@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 15:06:28 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/23 19:10:04 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ std::string	CGI::_exec( void ) {
     // Vérifiez que la taille de la requête est valide
     const int bodyLimit = _config->get_body_limit();
     if (contentSize > static_cast<std::size_t>(bodyLimit)) {
-        _code = HTTP::BAD_REQUEST;
+        _code = HTTP::REQUEST_ENTITY_TOO_LARGE;
         return "Request body size exceeds limit";
     }
 
@@ -222,6 +222,8 @@ char **	CGI::_generate_env( void ) const {
 	env["HTTP_USER_AGENT"] = _request->get_ressource("User-Agent");
 	env["HTTP_COOKIE"] = _request->get_ressource("Cookie"); // clef=valeur separate by ";"
 	env["HTTP_REFERER"] = _request->get_ressource("Referer");
+	if (_request->get_ressource("X-Secret-Header-For-Test").size() > 0)
+		env["HTTP_X_SECRET_HEADER_FOR_TEST"] = _request->get_ressource("X-Secret-Header-For-Test");
 
 	char **	env_char = new char*[env.size() + 1];
 
