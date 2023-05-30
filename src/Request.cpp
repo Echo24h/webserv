@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 20:57:08 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/30 13:46:24 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,7 +268,7 @@ void Request::_construct_content( const std::string & buff ) {
 	
 }
 
-void	Request::_read_request( int sockfd, std::string & request_data ) {
+/*void	Request::_read_request( int sockfd, std::string & request_data ) {
 	
     char buffer[8000];
 
@@ -306,9 +306,9 @@ void	Request::_read_request( int sockfd, std::string & request_data ) {
 				request_data.append(buffer, bytes_received);
 		}
 	}
-}
+}*/
 
-/*void	Request::_read_request( int sockfd, std::string & request_data ) {
+void	Request::_read_request( int sockfd, std::string & request_data ) {
 	
     char buffer[BUFF_SIZE];
 
@@ -334,7 +334,7 @@ void	Request::_read_request( int sockfd, std::string & request_data ) {
 		}
 		usleep(1000);
 	}
-}*/
+}
 
 // Read la requete du client et construit l'objet Request au fur et a mesure
 void Request::_construct( const int & client_socket ) {

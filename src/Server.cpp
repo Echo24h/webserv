@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 20:34:29 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/30 15:11:13 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 	// L'objet Request lit la requette client et creer un objet
 	HTTP::Request	request = Request(config, client_socket);
 
-	//std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
+	std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
 	if (config->get_debug() == true)
 		std::cout << YELLOW << "[" << request.get_full_request().substr(0, 300) << "]" << DEF << std::endl;
 
@@ -128,13 +128,12 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 		if (ret == (size_t)-1)
 			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
 		else {
-			//std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << " [" << ret << "]" << std::endl;
+			std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << " [" << ret << "]" << std::endl;
 			if (config->get_debug() == true)
 				std::cout << GREEN << "[" << response_string.substr(0, 300).c_str() << "]" << DEF << std::endl;
 		}
 			
 	}
-	close(client_socket);
 }
 
 void	Server::run( void ) {
@@ -164,11 +163,15 @@ void	Server::run( void ) {
 
 	while(1) {
 
+		struct timeval timeout;
+
+		timeout.tv_sec = 5;
+    	timeout.tv_usec = 0;
 
 		// Car select est destructeur
 		ready_sockets = current_sockets;
 
-		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, NULL) < 0)
+		if (select(max_socket_so_far + 1, &ready_sockets, NULL, NULL, &timeout) < 0)
 			throw std::runtime_error("[Server.cpp] select() : " + std::string(strerror(errno)));
 
 		for (int i = 0; i <= max_socket_so_far; i++) {
@@ -189,8 +192,11 @@ void	Server::run( void ) {
 					
 					// On manage la connexion au socket et le supprime de notre liste
 					FD_CLR(i, &current_sockets);
+					//FD_CLR(i, &ready_sockets);
 					_handle_connexion(i, clients_config.find(i)->second);
 					clients_config.erase(i);
+					//usleep(2000);
+					close(i);
 				}
 			}
 		}
