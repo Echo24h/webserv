@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/30 13:46:24 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/31 18:27:06 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -308,32 +308,136 @@ void Request::_construct_content( const std::string & buff ) {
 	}
 }*/
 
-void	Request::_read_request( int sockfd, std::string & request_data ) {
+/*void	Request::_read_request( int sockfd, std::string & request_data ) {
 	
     char buffer[BUFF_SIZE];
 
-	fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	bool	chunked = false;
+	int		recv_count = 0;
+
+	//fcntl(sockfd, F_SETFL, O_NONBLOCK);
+
+	bool	start = true;
 
     while (true) {
+
+		if (!chunked)
+			usleep(2000);
 		
         memset(buffer, 0, BUFF_SIZE);
 		
         int bytes_received = recv(sockfd, buffer, BUFF_SIZE, 0);
 
-        if (bytes_received == -1) {
-			
+		recv_count++;
+
+        if ((bytes_received <= 0 && !chunked) || (recv_count > 50000 && chunked)) {
             break;
         }
 		else {
-			if (bytes_received == 0) {
-				// Le socket a été fermé
-				break;
-			}
-			else
+			
+			if (bytes_received > 0) {
+
+				recv_count = 0;
+
 				request_data.append(buffer, bytes_received);
+			
+				if (start == true) {
+
+					size_t delim = request_data.find("\r\n\r\n");
+
+					if (delim != (size_t)-1) {
+						start = false;
+						if (request_data.find("Transfer-Encoding: chunked") != (size_t)-1 && request_data.find("Transfer-Encoding: chunked") < delim)
+							chunked = true;
+					}
+				}
+
+			}
 		}
-		usleep(1000);
 	}
+}*/
+
+// Fonction pour lire une requête en mode "chunked" ou avec une taille de contenu
+void	Request::_read_request( int socket, std::string & request_data ) {
+
+    char buffer[BUFF_SIZE];
+
+    int bytesRead = 0;
+    bool isChunked = false;
+	bool isContentLength = false;
+    int contentLength = 0;
+
+	int		recv_count = 0;
+
+	//int		delim = -1;
+
+	usleep(REQUEST_INTERVAL);
+
+    // Lire les données jusqu'à ce que la fin de la requête soit atteinte
+    while (true) {
+
+		memset(buffer, 0, BUFF_SIZE);
+		
+        bytesRead = recv(socket, buffer, BUFF_SIZE, 0);
+
+		recv_count++;
+		
+        if (recv_count > 1000000) {
+			std::cerr << ERROR << "[Request.cpp] _read_request() : timeout reading from socket" << std::endl;
+            break; // Erreur de lecture ou fin de connexion
+        }
+
+		if (bytesRead > 0) {
+			if (isChunked || isContentLength)
+				recv_count = 0;
+        	request_data.append(buffer, bytesRead);
+		}
+
+        // Vérifier le mode de la requete
+        if (!isChunked && !isContentLength) {
+            
+			size_t headerEndPos = request_data.find("\r\n\r\n");
+
+			if (headerEndPos != std::string::npos) {
+
+                size_t transferEncodingPos = request_data.find("Transfer-Encoding: chunked");
+                
+				if (transferEncodingPos != std::string::npos) {
+                    isChunked = true;
+                } 
+				else {
+                    size_t contentLengthPos = request_data.find("Content-Length:");
+                    
+					if (contentLengthPos != std::string::npos) {
+
+                        contentLengthPos += sizeof("Content-Length:");
+
+                        size_t contentLengthEndPos = request_data.find("\r\n", contentLengthPos);
+                        std::string contentLengthStr = request_data.substr(contentLengthPos, contentLengthEndPos - contentLengthPos);
+
+                        std::istringstream contentLengthStream(contentLengthStr);
+                        contentLengthStream >> contentLength;
+                        isContentLength = true;
+                    }
+                }
+				if (!isChunked && !isContentLength)
+					return ;
+            }
+        }
+
+        // Vérifier si toutes les données ont été lues
+        if (isContentLength && static_cast<int>(request_data.size()) >= contentLength) {
+            break;
+        }
+
+        // Vérifier si la fin de la requête en mode "chunked" est atteinte
+        if (isChunked && request_data.size() >= 7) {
+            std::string lastCharacters = request_data.substr(request_data.size() - 7);
+            if (lastCharacters == "\r\n0\r\n\r\n") {
+                break;
+            }
+        }
+    }
 }
 
 // Read la requete du client et construit l'objet Request au fur et a mesure

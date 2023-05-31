@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 18:16:41 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 17:54:11 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/31 18:21:37 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,11 +173,12 @@ std::string remove_double_slashes( const std::string & path ) {
 }
 
 ssize_t 					sendBig(int sockfd, const char * data, ssize_t size) {
-    // Initialisez les données selon vos besoins
+
+	usleep(REQUEST_INTERVAL);
 
     int totalSent = 0;
     int remaining = size;
-    int chunkSize = 10000;  // Taille de chaque morceau à envoyer
+    int chunkSize = 100000000;  // Taille de chaque morceau à envoyer
 
 	if (remaining < chunkSize)
 		chunkSize = remaining;
@@ -198,7 +199,6 @@ ssize_t 					sendBig(int sockfd, const char * data, ssize_t size) {
 
 		if (remaining < chunkSize)
 			chunkSize = remaining;
-		//usleep(2000);
     }
 	return (ssize_t)totalSent;
 }

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:18:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/11 17:45:57 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/31 17:32:29 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,6 @@
 # include <netinet/in.h>
 # include <arpa/inet.h>
 # include <fcntl.h>
-
-#define BACKLOG 10	/* Nombre maxi de connections acceptées en file */
 
 namespace HTTP {
 

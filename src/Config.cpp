@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:24:04 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 19:30:27 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/31 17:52:52 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,11 +179,11 @@ Config::tokens::const_iterator Config::_trait_serv_param( ConfigServer * server,
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'port' in file \"" + std::string(_path) + "\"");
 		server->set_port(atoi((*it).substr(0, (*it).length() - 1).c_str()));
 	}
-	else if (*it == "debug") {
+	else if (*it == "logs") {
 		it++;
 		if (*(*it).rbegin() != ';')
 			throw std::invalid_argument("[Config.cpp] expected ';' at 'port' in file \"" + std::string(_path) + "\"");
-		server->set_debug((*it).substr(0, (*it).length() - 1).c_str());
+		server->set_logs((*it).substr(0, (*it).length() - 1).c_str());
 	}
 	else if (*it == "server_name") {
 		it++;

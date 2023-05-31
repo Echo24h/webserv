@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/30 15:11:13 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/31 17:57:29 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,10 +44,10 @@ void	Server::_setup_server( void ) {
 		struct sockaddr_in address;
 		memset(&address, 0, sizeof(address));
 
-		if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+		if ((server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
 			throw std::runtime_error("[Server.cpp] socket() : " + std::string(strerror(errno)));
 
-		fcntl(server_socket, F_SETFL, O_NONBLOCK);
+		//fcntl(server_socket, F_SETFL, O_NONBLOCK);
 
 		if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
 			throw std::runtime_error("[Server.cpp] setsockopt() : " + std::string(strerror(errno)));
@@ -89,7 +89,19 @@ int	Server::_accept_connection( const int & server_socket ) const {
 	if ((client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addrlen)) == -1)
 		std::cerr << ERROR << "[Server.cpp] accept() : " << strerror(errno) << std::endl;
 
-	fcntl(client_socket, F_SETFL, O_NONBLOCK);
+	//fcntl(client_socket, F_SETFL, O_NONBLOCK);
+
+	// Configuration de l'option SO_LINGER
+    /*struct linger so_linger;
+    so_linger.l_onoff = 1;    // Activer SO_LINGER
+    so_linger.l_linger = 5;  // Temps d'attente en secondes
+
+    if (setsockopt(client_socket, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger)) == -1) {
+        std::cerr << ERROR << "[Server.cpp] setsockopt() : " << strerror(errno) << std::endl;
+        close(client_socket);
+        return -1;
+    }*/
+
 
 	return client_socket;
 }
@@ -107,8 +119,9 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 	// L'objet Request lit la requette client et creer un objet
 	HTTP::Request	request = Request(config, client_socket);
 
-	std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
-	if (config->get_debug() == true)
+	if (config->get_logs() == "short" || config->get_logs() == "full")
+		std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
+	if (config->get_logs() == "full")
 		std::cout << YELLOW << "[" << request.get_full_request().substr(0, 300) << "]" << DEF << std::endl;
 
 	// L'objet client creer une reponse a partir de l'objet Request
@@ -120,7 +133,8 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 
 	//std::cout << response_string.size() << std::endl;
 	count++;
-	std::cout << count << std::endl;
+	if (config->get_logs() == "count")
+		std::cout << count << std::endl;
 	if (response_string.empty())
 		std::cerr << ERROR << "[Server.cpp] Empty response" << std::endl;
 	else {
@@ -128,8 +142,9 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 		if (ret == (size_t)-1)
 			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
 		else {
-			std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << " [" << ret << "]" << std::endl;
-			if (config->get_debug() == true)
+			if (config->get_logs() == "short" || config->get_logs() == "full")
+				std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << " [" << ret << "]" << std::endl;
+			if (config->get_logs() == "full")
 				std::cout << GREEN << "[" << response_string.substr(0, 300).c_str() << "]" << DEF << std::endl;
 		}
 			
@@ -165,7 +180,7 @@ void	Server::run( void ) {
 
 		struct timeval timeout;
 
-		timeout.tv_sec = 5;
+		timeout.tv_sec = 10;
     	timeout.tv_usec = 0;
 
 		// Car select est destructeur

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:08 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 19:21:00 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/31 18:27:07 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ public:
 
 	// SETTERS
 
-	void	set_debug( const std::string & debug );
+	void	set_logs( const std::string & debug );
 
 	void	set_host( const std::string & host );
 
@@ -77,7 +77,7 @@ public:
 
 	cookies *	get_cookies( void ) const;
 
-	bool		get_debug( void ) const;
+	std::string		get_logs( void ) const;
 
 	std::string	get_host( void ) const;
 
@@ -97,7 +97,7 @@ public:
 
 private:
 
-	bool				_debug;
+	std::string			_logs;
 	std::string			_host;
 	int					_port;
 	std::string			_server_name;

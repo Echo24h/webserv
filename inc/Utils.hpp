@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 19:09:49 by gborne           ###   ########.fr       */
+/*   Updated: 2023/05/31 18:26:00 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,10 @@
 
 namespace HTTP {
 
-# define LINE_END	"\r\n"
-# define BUFF_SIZE	100000
+# define LINE_END			"\r\n"
+# define BUFF_SIZE			1000000
+# define REQUEST_INTERVAL	200 // usec (x2)
+# define BACKLOG			512	/* Nombre maxi de connections acceptées en file */
 
 enum Code {
 
