@@ -59,11 +59,10 @@ server {
 
 ## Test:
 
-Webserv est livré avec un mini programme pour envoyer des requêtes au serveur. Vous pouvez l'utiliser pour tester le fonctionnement du serveur en envoyant plusieurs requêtes POST à l'adresse `localhost:3490`. Voici comment l'utiliser :
+Webserv est livré avec un mini script `python` modifiable pour envoyer des requêtes au serveur. Vous pouvez l'utiliser pour tester le fonctionnement du serveur en envoyant plusieurs requêtes POST à l'adresse `localhost:3498`. Voici comment l'utiliser :
 ```
-./request test/post.txt 50
+./request.py
 ```
-Ceci enverra 50 requêtes POST à l'adresse `localhost:3490`. Vous pouvez également utiliser d'autres fichiers de requêtes HTTP au format `.txt` qui se trouvent dans le dossier `test/`.
 
 ## Methodes:
 
