@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WebServ</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="main">
+		<div id="top" class="container">
+			<img src="img/logo.png" alt="Logo Webserv" width="200px" height="200px">
+		</div>
+		<div class="container">
+
+			<div id="container-cookie">
+
+				<form id="cookie-form">
+					<label for="cookieName">Cookie name:</label>
+					<input type="text" id="cookieName" name="cookieName"><br>
+
+					<label for="cookieValue">Cookie value:</label>
+					<input type="text" id="cookieValue" name="cookieValue"><br>
+
+					<input type="submit" value="Create cookie">
+				</form>
+			</div>
+
+			<div id="container-upload">
+				
+				<form id="delete-form">
+					<label for="file-name">File name :</label>
+					<input type="text" id="file-name" name="file-name" required>
+					<button type="submit">Delete</button>
+				</form>
+
+				<script src="files.js"></script>
+
+				<div id="upload-form">
+					<input type="file" id="file-input" multiple>
+					<div class="text">
+						<p>Drag your files here or click in this area.</p>
+						<p>(use 'Ctrl' for multiple selection)</p>
+					</div>
+					<button type="button" id="upload-button">Upload</button>
+					<div id="message-container"></div>
+				</div>
+				
+				<script src="cookies.js"></script>
+				
+				<style>
+				.message {
+					padding: 10px;
+					margin-bottom: 10px;
+					border-radius: 4px;
+					font-weight: bold;
+				}
+				
+				.success {
+					background-color: #c8e6c9;
+					color: #2e7d32;
+				}
+				
+				.error {
+					background-color: #ffcdd2;
+					color: #c62828;
+				}
+				</style>
+
+			</div>
+		</div>
+		<div class="container">
+		</div>
+	</div>
+</body>
+</html>

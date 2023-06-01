@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 17:24:04 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/31 17:52:52 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 14:41:10 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,8 +215,7 @@ void Config::_init_serv( const Config::tokens & tokens ) {
 	Config::tokens::const_iterator	ite = tokens.end();
 
 	while (it != ite) {
-		//std::cout << "<" << *(it++) << ">" << std::endl;
-
+		
 		if (*it == "server") {
 
 			ConfigServer server;

@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 16:20:48 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/31 17:58:38 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 14:41:57 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,6 @@ void	ConfigServer::set_body_limit( const std::string & body_limit ) {
 
 	if (_body_limit < 2)
 		throw std::invalid_argument("[ConfigServer.cpp] body_limit must be larger than 2");
-	//std::cout << "body_limit: " << _body_limit << std::endl;
 	return ;
 }
 
@@ -138,8 +137,6 @@ void	ConfigServer::new_location( ConfigServer::location & location ) {
 }
 
 // GETTERS
-
-//ConfigServer::cookies *	ConfigServer::get_cookies( void ) const { return _cookies; }
 
 std::string				ConfigServer::get_logs( void ) const { return _logs; }
 
@@ -169,12 +166,6 @@ ConfigServer::location	* ConfigServer::get_location( const std::string & virtual
 			path = std::string("/" + path);
 		if (path.size() > 1 && path[path.size() - 1] == '/')
 			path = path.substr(0, path.size() - 1);
-
-		//if (location != NULL)
-		//	std::cout << "it->get_name(): " << it->get_name() << std::endl;
-		//std::cout << "loc_name: " << loc_name << std::endl;
-		//std::cout << "path: " << path << std::endl;
-
 		if (path.compare(0, loc_name.size(), loc_name) == 0) {
 			
 			if (location == NULL || location->get_name().size() < loc_name.size())
@@ -183,10 +174,6 @@ ConfigServer::location	* ConfigServer::get_location( const std::string & virtual
 
 		it++;
 	}
-	//if (location != NULL)
-	//	std::cout << "choice: location->get_name(): " << location->get_name() << std::endl;
-	//else
-	//	std::cout << "choice: NULL" << std::endl;
 	return location;
 }
 

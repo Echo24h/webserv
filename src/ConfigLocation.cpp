@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/11 19:37:23 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/23 19:30:42 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 14:40:53 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,6 @@ void	ConfigLocation::set_body_limit( const std::string & body_limit ) {
 
 	if (_body_limit < 2)
 		throw std::invalid_argument("[ConfigServer.cpp] body_limit must be larger than 2");
-	//std::cout << "body_limit: " << _body_limit << std::endl;
 	return ;
 }
 

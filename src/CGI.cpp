@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/31 17:01:31 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 14:41:43 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,6 @@ std::string	CGI::_exec( void ) {
 	int			saveStdin;
 	int			saveStdout;
 
-	// SAVING STDIN AND STDOUT IN ORDER TO TURN THEM BACK TO NORMAL LATER
 	saveStdin = dup(STDIN_FILENO);
 	saveStdout = dup(STDOUT_FILENO);
 
@@ -231,7 +230,6 @@ char **	CGI::_generate_env( void ) const {
 	int i = 0;
 	while (it != env.end()) {
 		std::string str = it->first + "=" + it->second;
-		//std::cout << str << std::endl;
 		env_char[i] = strdup(str.c_str());
 		it++, i++;
 	}

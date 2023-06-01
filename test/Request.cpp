@@ -17,7 +17,7 @@ int request(char **argv) {
     struct sockaddr_in serv_addr;
     memset(&serv_addr, '0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(3490); // Port HTTP par défaut
+    serv_addr.sin_port = htons(3002); // Port HTTP par défaut
 
     // Adresse IP ou nom de domaine du serveur cible
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {

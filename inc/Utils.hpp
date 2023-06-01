@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 01:45:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/31 18:26:00 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 12:51:29 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,8 @@ std::string					itoa( const int & num );
 bool						is_number( const std::string & s );
 
 bool						file_exist( const std::string & path );
+
+bool						is_directory( const std::string & path );
 
 std::string					get_key( const std::string & line, const std::string & separator = ": ");
 

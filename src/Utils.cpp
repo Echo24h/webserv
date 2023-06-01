@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/05 18:16:41 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/31 18:21:37 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 14:44:19 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,15 @@ bool	file_exist( const std::string & path ) {
 	}
 	std::ifstream file(path.c_str());
 	return file.good();
+}
+
+bool	is_directory( const std::string & path ) {
+	struct stat fileStat;
+	if (stat(path.c_str(), &fileStat) == 0)
+	{
+		return S_ISDIR(fileStat.st_mode);
+	}
+	return false;
 }
 
 std::string	get_key( const std::string & line, const std::string & separator ) {
@@ -118,7 +127,7 @@ std::string read_file( const std::string & path ) {
 	std::string		content;
 
 	if (ifs.fail())
-		std::cerr << ERROR << "[Utils.cpp] read_file() : file " << path << " not found" << std::endl;
+		std::cerr << WARN << "[Utils.cpp] read_file() : file " << path << " not found" << std::endl;
 	else {
 		while (std::getline(ifs, str))
 			content += str += '\n';

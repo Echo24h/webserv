@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 20:21:21 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/31 16:52:19 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 14:43:04 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,31 +52,6 @@ std::string	Response::get_type( void ) const {
 
 // FUNCTIONS
 
-/*std::string Response::_set_cookie( void ) {
-
-	std::stringstream	ss;
-
-	ConfigServer::cookies * cookies = _config->get_cookies();
-	ConfigServer::cookies::iterator it = cookies->begin();
-
-	if (_request.get_ressource()->find("Cookie") != _request.get_ressource()->npos))
-
-	ss << "Set-Cookie: ";
-
-	while (it != cookies->end()) {
-
-	}
-
-	if (!_config._cookies.empty()) {
-
-		for (auto it = cookies.begin(); it != cookies.end(); ++it) {
-			ss << it->first << "=" << it->second << "; ";
-		}
-		ss << "\r\n";
-	}
-	return ss.str();
-}*/
-
 // Converti l'objet Response en std::string pour être envoyé avec un write()
 std::string	Response::to_string( void ) const {
 
@@ -84,6 +59,8 @@ std::string	Response::to_string( void ) const {
 	std::string			response;
 
 	ss << "HTTP/1.1 " << itoa(_code) << "\r\n";
+	ss << "Server: " << _config->get_server_name() << "\r\n";
+	ss << "Set-Cookie: " << _request->get_ressource("Cookie") << "\r\n";
 	if (_request->get_method() != "DELETE") {
 		if (_type.empty())
 			ss << "Content-Type: " << "text/html; charset=utf-8" << "\r\n";
@@ -158,33 +135,95 @@ void	Response::_construct_put( void ) {
 		_code = 404;
 }
 
+// Télécharge les fichiers en parsant le multipart/form-data
+void Response::_construct_multipartformdata( void ) {
+
+	std::string contentTypeHeader = _request->get_ressource("Content-Type");
+	std::string boundary;
+
+	size_t boundaryPos = contentTypeHeader.find("boundary=");
+	if (boundaryPos != std::string::npos)
+	{
+		boundary = contentTypeHeader.substr(boundaryPos + 9);
+		// Vérifier si le boundary a été extrait avec succès
+		if (!boundary.empty())
+		{
+			// Séparer les parties du contenu en utilisant le boundary
+			std::vector<std::string> parts = split(_request->get_content(), "--" + boundary);
+
+			std::vector<std::string>::iterator it = parts.begin();
+			std::vector<std::string>::iterator ite = parts.end();
+			
+			// Parcourir les parties du contenu
+			while (it != ite) {
+				
+				std::string part = *it;
+				// Ignorer les parties vides ou le délimiteur de fin
+				if (!part.empty() && part != "--\r\n")
+				{
+					// Rechercher les informations du fichier
+					size_t filenamePos = part.find("filename=\"");
+					if (filenamePos != std::string::npos)
+					{
+						// Extraire le nom du fichier
+						size_t filenameStart = filenamePos + 10;
+						size_t filenameEnd = part.find("\"", filenameStart);
+						std::string filename = part.substr(filenameStart, filenameEnd - filenameStart);
+
+						// Rechercher le contenu du fichier
+						size_t fileContentPos = part.find("\r\n\r\n");
+						
+						if (fileContentPos != std::string::npos) {
+							// Extraire le contenu du fichier
+							size_t fileContentStart = fileContentPos + 4;
+							std::string fileContent = part.substr(fileContentStart);
+							create_file(_request->get_real_path() + filename, fileContent);
+						}
+						else {
+							std::cerr << WARN << "[Resonse.cpp] _construct_multipartformdata() : Impossible de trouver le contenu du fichier dans la partie multipart." << std::endl;
+							_code = HTTP::BAD_REQUEST;
+						}
+					}
+					else {
+						std::cerr << WARN << "[Response.cpp] _construct_multipartformdata() : Seul les fichiers peuvent être traiter" << std::endl;
+						_code = HTTP::BAD_REQUEST;
+						break;
+					}
+				}
+				it++;
+			}
+		}
+		else {
+			std::cerr << WARN << "[Response.cpp] _construct_multipartformdata() : Erreur lors de l'extraction du boundary." << std::endl;
+			_code = HTTP::BAD_REQUEST;
+		}
+	}
+	else {
+		std::cerr << WARN << "[Response.cpp] _construct_multipartformdata() : L'en-tête Content-Type ne contient pas de boundary." << std::endl;
+		_code = HTTP::BAD_REQUEST;
+	}
+	if (_code < 400)
+		_code = 204;
+}
+
 // Construit la Response a partir de la Request
 void	Response::_construct( void ) {
 
 	_final_path = _request->get_real_path();
 	_type = _config->get_type(get_extension(_final_path));
 
-	//std::cout << "real_path: " << _request->get_real_path() << std::endl;
-	//std::cout << "virtual_path: " << _request->get_virtual_path() << std::endl;
-	//std::cout << "location_name: " << _request->get_location()->get_name() << std::endl;
-
-	//std::cout << _request->get_content().size() << std::endl;
-	//std::cout << (size_t)_request->get_location()->get_body_limit() << std::endl;
 	if (_request->get_content().size() > (size_t)_request->get_location()->get_body_limit())
 		_construct_error(HTTP::REQUEST_ENTITY_TOO_LARGE, "Request body size exceeds limit");
 	else if (_request->get_version() != "HTTP/1.1")
 		_construct_error(HTTP::HTTP_VERSION_NOT_SUPPORTED);
 	else if (_request->get_method().empty())
 		_construct_error(HTTP::METHOD_NOT_ALLOWED);
-	else if (_request->get_real_path().empty() && !_request->is_cgi() && _request->get_method() != "POST") {
-		//std::cout << ERROR << "ICI" << std::endl;
+	else if (_request->get_real_path().empty() && !_request->is_cgi() && _request->get_method() != "POST")
 		_construct_error(HTTP::NOT_FOUND);
-		//std::cout << "real_path: " << _request->get_real_path() << std::endl;
-		//std::cout << "virtual_path: " << _request->get_virtual_path() << std::endl;
-		//std::cout << "location_name: " << _request->get_location()->get_name() << std::endl;
-	}
 	else if (_request->get_method() == "DELETE")
 		_construct_delete();
+	else if ((_request->get_method() == "POST" || _request->get_method() == "PUT") && _request->get_ressource("Content-Type").find("multipart/form-data;") == 0)
+		_construct_multipartformdata();
 	else if (_request->get_method() == "PUT")
 		_construct_put();
 	else if (_request->is_cgi())
@@ -193,7 +232,8 @@ void	Response::_construct( void ) {
 		_construct_error(HTTP::UNSUPORTED_MEDIA_TYPE);
 	else {
 		_code = HTTP::OK;
-		_content = read_file(_final_path);
+		if (!_final_path.empty())
+			_content = read_file(_final_path);
 	}
 	return ;
 }

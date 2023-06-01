@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:37:32 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/31 18:27:06 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 14:46:17 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,6 @@ Request::Request( ConfigServer * config, const int & client_socket ) : _config(c
 
 	// construit la requette avec des read sur le socket client
 	_construct(client_socket);
-
-	// FOR DEBUG
-	//create_file("test/last_request", _content);
 	return ;
 }
 
@@ -76,14 +73,14 @@ std::string	Request::get_real_path() const {
 
 			if (!path.empty()) {
 
-				if (_loc->get_params().empty()) {
+				if (_loc->get_params().empty() && _method != "DELETE") {
 					return std::string();
 				}
 				// POUR DIFFERENCIER "/" et "/*"
 				//else if (_loc->get_params() == "/" && ((path.find("/", 1) != (size_t)-1) || path.find("?", 0) != (size_t)-1)) {
 				//	return std::string();
 				//}
-				else if (file_exist(_loc->get_root() + path) || _method == "PUT") {
+				else if (file_exist(_loc->get_root() + path) || _method == "PUT" ) {
 					return remove_double_slashes(_loc->get_root() + path);
 				}
 				else if (file_exist(_loc->get_root() + path + "/" + _loc->get_index())) {
@@ -93,6 +90,9 @@ std::string	Request::get_real_path() const {
 			else {
 				if (file_exist(_loc->get_root() + _loc->get_index())) {
 					return remove_double_slashes(_loc->get_root() + _loc->get_index());
+				}
+				else if (is_directory(_loc->get_root()) && (_method == "PUT" || _method == "POST") && get_ressource("Content-Type").find("multipart/form-data") != (size_t)-1) {
+					return remove_double_slashes(_loc->get_root() + "/");
 				}
 			}
 		}
@@ -218,7 +218,7 @@ int get_chunk_size(const std::string& str)
 		try {
 		result = static_cast<int>(strtol(str.c_str(), NULL, 16));
 		} catch ( const std::exception & e ) {
-			std::cerr << ERROR << "[Response.cpp] _construct_put() : Invalid chunk size" << std::endl;
+			std::cerr << WARN << "[Response.cpp] _construct_put() : Invalid chunk size" << std::endl;
 			return -1;
 		}
 	}
@@ -241,12 +241,10 @@ void Request::_construct_content( const std::string & buff ) {
 
 			int bytes = get_chunk_size(line.c_str());
 
-			//std::cout << "bytes: " << bytes << std::endl;
-
 			if (bytes == 0)
 				break;
 			else if (bytes == -1) {
-				 std::cerr << ERROR << "[Request.cpp] _construct_content() : wrong format fragment request" << std::endl;
+				 std::cerr << WARN << "[Request.cpp] _construct_content() : wrong format fragment request" << std::endl;
 				return;
 			}
 
@@ -257,9 +255,6 @@ void Request::_construct_content( const std::string & buff ) {
 
 		}
 		_ressources.insert(std::make_pair("Content-Length", itoa(content_length)));
-
-		//std::cout << "content_length: " << content_length << std::endl;
-		//std::cout << "content_size: " << _content.size() << std::endl;
 	}
 	// Pour les requettes non fragementées
 	else
@@ -267,95 +262,6 @@ void Request::_construct_content( const std::string & buff ) {
 
 	
 }
-
-/*void	Request::_read_request( int sockfd, std::string & request_data ) {
-	
-    char buffer[8000];
-
-	//fcntl(sockfd, F_SETFL, O_NONBLOCK);
-
-	int nb_block = 0;
-
-    while (true) {
-		
-        memset(buffer, 0, 8000);
-		
-        int bytes_received = recv(sockfd, buffer, 8000, 0);
-
-        if (bytes_received == -1) {
-			
-			nb_block++;
-			
-            if ( errno != 11) {
-                std::cerr << ERROR << "[Request.cpp] read_request() : can't reading from socket" << std::endl;
-                break;
-			}
-			if (nb_block > 10000) {
-				//std::cerr << ERROR << "[Request.cpp] read_request() : timeout reading from socket" << std::endl;
-				break;
-			}
-			
-        }
-		else {
-			nb_block = 0;
-			if (bytes_received == 0) {
-				// Le socket a été fermé
-				break;
-			}
-			else
-				request_data.append(buffer, bytes_received);
-		}
-	}
-}*/
-
-/*void	Request::_read_request( int sockfd, std::string & request_data ) {
-	
-    char buffer[BUFF_SIZE];
-
-	bool	chunked = false;
-	int		recv_count = 0;
-
-	//fcntl(sockfd, F_SETFL, O_NONBLOCK);
-
-	bool	start = true;
-
-    while (true) {
-
-		if (!chunked)
-			usleep(2000);
-		
-        memset(buffer, 0, BUFF_SIZE);
-		
-        int bytes_received = recv(sockfd, buffer, BUFF_SIZE, 0);
-
-		recv_count++;
-
-        if ((bytes_received <= 0 && !chunked) || (recv_count > 50000 && chunked)) {
-            break;
-        }
-		else {
-			
-			if (bytes_received > 0) {
-
-				recv_count = 0;
-
-				request_data.append(buffer, bytes_received);
-			
-				if (start == true) {
-
-					size_t delim = request_data.find("\r\n\r\n");
-
-					if (delim != (size_t)-1) {
-						start = false;
-						if (request_data.find("Transfer-Encoding: chunked") != (size_t)-1 && request_data.find("Transfer-Encoding: chunked") < delim)
-							chunked = true;
-					}
-				}
-
-			}
-		}
-	}
-}*/
 
 // Fonction pour lire une requête en mode "chunked" ou avec une taille de contenu
 void	Request::_read_request( int socket, std::string & request_data ) {
@@ -382,8 +288,8 @@ void	Request::_read_request( int socket, std::string & request_data ) {
 
 		recv_count++;
 		
-        if (recv_count > 1000000) {
-			std::cerr << ERROR << "[Request.cpp] _read_request() : timeout reading from socket" << std::endl;
+        if (recv_count > 100000) {
+			std::cerr << WARN << "[Request.cpp] _read_request() : timeout reading from socket (read method not specified)" << std::endl;
             break; // Erreur de lecture ou fin de connexion
         }
 
@@ -457,30 +363,7 @@ void Request::_construct( const int & client_socket ) {
 		_construct_content(_full_request.substr(delim + 4, _full_request.size() - (delim + 4)));
 	}
 }
-/*
-void process_request(int sockfd) {
-    char buffer[BUFFER_SIZE];
-    std::string request_data;
 
-    while (true) {
-        memset(buffer, 0, BUFFER_SIZE);
-        int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-
-        if (bytes_received < 0) {
-            std::cerr << "Error receiving data from socket" << std::endl;
-            break;
-        }
-
-        if (bytes_received == 0) {
-            break;
-        }
-
-        request_data.append(buffer, bytes_received);
-    }
-
-    std::cout << "Received " << request_data.length() << " bytes: " << std::endl;
-    std::cout << request_data << std::endl;
-}*/
 
 std::ostream &	operator<<( std::ostream & o, Request const & rhs ) {
 	o << rhs.get_method() << " ";

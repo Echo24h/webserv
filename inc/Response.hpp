@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 19:35:40 by gborne            #+#    #+#             */
-/*   Updated: 2023/04/12 16:43:22 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 12:03:34 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ private:
 	void		_construct( void );
 
 	void		_construct_cgi( void );
+
+	void		_construct_multipartformdata( void );
 
 	void		_construct_error( const int & code, const std::string & msg = std::string() );
 

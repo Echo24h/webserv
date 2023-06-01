@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 03:27:59 by gborne            #+#    #+#             */
-/*   Updated: 2023/05/31 17:57:29 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 14:43:30 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,6 @@ void	Server::_setup_server( void ) {
 
 		if ((server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
 			throw std::runtime_error("[Server.cpp] socket() : " + std::string(strerror(errno)));
-
-		//fcntl(server_socket, F_SETFL, O_NONBLOCK);
 
 		if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
 			throw std::runtime_error("[Server.cpp] setsockopt() : " + std::string(strerror(errno)));
@@ -207,10 +205,8 @@ void	Server::run( void ) {
 					
 					// On manage la connexion au socket et le supprime de notre liste
 					FD_CLR(i, &current_sockets);
-					//FD_CLR(i, &ready_sockets);
 					_handle_connexion(i, clients_config.find(i)->second);
 					clients_config.erase(i);
-					//usleep(2000);
 					close(i);
 				}
 			}
