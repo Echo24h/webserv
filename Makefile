@@ -48,14 +48,12 @@ endif
 
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
-	$(CXX) -o request test/Request.cpp
-
+	
 clean:
 	$(RM) $(OBJS)
 
 fclean: clean
 	$(RM) $(NAME)
-	rm -f request
 
 re: fclean $(NAME)
 
