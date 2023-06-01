@@ -2,6 +2,9 @@
 webserv
 request
 
+# MacOS
+.DS_Store
+
 # Valgrind
 *.dSYM
 
