@@ -54,6 +54,8 @@ server {
 		root		www/uploads/;
 	}
 }
+
+# Il est possible d'ajouter d'autres serveurs à la suite ...
 ```
 
 ## Test:
