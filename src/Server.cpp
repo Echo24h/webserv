@@ -109,16 +109,20 @@ static int count = 0;
 // Gère une connexion (recv() Request + send() Response)
 void	Server::_handle_connexion( const int & client_socket, ConfigServer * config ) const {
 
-	// On récupère les informations du client pour l'affichage dans la console
-    struct sockaddr_in addr;
-    socklen_t addrlen = sizeof(addr);
-    getsockname(client_socket, (struct sockaddr *)&addr, &addrlen);
+	// On récupère les informations du client et server pour l'affichage dans la console
+    struct sockaddr_in serverAddr;
+    socklen_t ServerAddrlen = sizeof(serverAddr);
+    getsockname(client_socket, (struct sockaddr *)&serverAddr, &ServerAddrlen);
+
+	struct sockaddr_in clientAddr;
+	socklen_t clientAddrLen = sizeof(clientAddr);
+	getpeername(client_socket, (struct sockaddr*)&clientAddr, &clientAddrLen);
 
 	// L'objet Request lit la requette client et creer un objet
 	HTTP::Request	request = Request(config, client_socket);
 
 	if (config->get_logs() == "short" || config->get_logs() == "full")
-		std::cout << RECV << inet_ntoa(addr.sin_addr) << " : " <<  request << std::endl;
+		std::cout << RECV << inet_ntoa(serverAddr.sin_addr) << ":" << ntohs(serverAddr.sin_port) << " " <<  request << std::endl;
 	if (config->get_logs() == "full")
 		std::cout << YELLOW << "[" << request.get_full_request().substr(0, 300) << "]" << DEF << std::endl;
 
@@ -141,7 +145,7 @@ void	Server::_handle_connexion( const int & client_socket, ConfigServer * config
 			std::cerr << ERROR << "[Server.cpp] send() : " << strerror(errno) << std::endl;
 		else {
 			if (config->get_logs() == "short" || config->get_logs() == "full")
-				std::cout << SEND << inet_ntoa(addr.sin_addr) << " : " << response << " [" << ret << "]" << std::endl;
+				std::cout << SEND << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << " " << response << " [" << ret << "]" << std::endl;
 			if (config->get_logs() == "full")
 				std::cout << GREEN << "[" << response_string.substr(0, 300).c_str() << "]" << DEF << std::endl;
 		}
