@@ -6,7 +6,7 @@
 /*   By: gborne <gborne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 14:52:38 by gborne            #+#    #+#             */
-/*   Updated: 2023/06/01 14:41:43 by gborne           ###   ########.fr       */
+/*   Updated: 2023/06/01 16:13:44 by gborne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,24 +55,28 @@ void	CGI::_construct( void ) {
 	// On verifie si le CGI gere le code HTTP
 	if (cgi_response.find("Status: ", 0) == 0) {
 		_content = cgi_response;
-		_code = atoi(cgi_response.substr(8, 3).c_str());
+		if (cgi_response.size() >= 11)
+			_code = atoi(cgi_response.substr(8, 3).c_str());
 	}
 
 	// On contruit la reponse CGI
 	if (_code < 400) {
-		size_t	delim = cgi_response.find("\r\n\r\n");
-		std::vector<std::string>	tokens = split(cgi_response.substr(0, delim));
-		std::map<std::string, std::string>	header;
+		if (!cgi_response.empty()) {
+			size_t	delim = cgi_response.find("\r\n\r\n");
+			std::vector<std::string>	tokens = split(cgi_response.substr(0, delim));
+			std::map<std::string, std::string>	header;
 
-		std::vector<std::string>::iterator	it = tokens.begin();
-		std::vector<std::string>::iterator	ite = tokens.end();
+			std::vector<std::string>::iterator	it = tokens.begin();
+			std::vector<std::string>::iterator	ite = tokens.end();
 
-		while (it != ite) {
-			header.insert(std::make_pair(get_key(*it), get_value(*it)));
-			it++;
-		}
-		_type = header["Content-type"];
-		_content = cgi_response.substr(delim + 4, cgi_response.size() - (delim + 4));
+			while (it != ite) {
+				header.insert(std::make_pair(get_key(*it), get_value(*it)));
+				it++;
+			}
+			_type = header["Content-type"];
+			if (delim != std::string::npos && cgi_response.size() > (delim + 4))
+				_content = cgi_response.substr(delim + 4, cgi_response.size() - (delim + 4));
+		}	
 	}
 	else
 		_content = cgi_response;
@@ -135,7 +139,7 @@ std::string	CGI::_exec( void ) {
 		dup2(fdOut, STDOUT_FILENO);
 
 		execve(arg[0], arg, env);
-		std::cerr << "CGI process fail: excve errno " << errno << std::endl;
+		std::cerr << ERROR << "[CGI.cpp] CGI process fail: excve() errno=" << errno << std::endl;
 		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
 		exit(EXIT_FAILURE);
 	}
