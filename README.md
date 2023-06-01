@@ -59,7 +59,7 @@ server {
 
 ## Test:
 
-Webserv est livré avec un mini script `python` modifiable pour envoyer des requêtes au serveur. Vous pouvez l'utiliser pour tester le fonctionnement du serveur en envoyant plusieurs requêtes POST à l'adresse `localhost:3498`. Voici comment l'utiliser :
+Webserv est livré avec un mini script `python` modifiable pour envoyer des requêtes au serveur. Vous pouvez l'utiliser pour tester le fonctionnement du serveur en envoyant une requête à l'adresse `localhost:3498` par exemple :
 ```
 ./request.py
 ```
