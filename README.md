@@ -33,26 +33,26 @@ Voici un exemple de fichier de configuration :
 
 ```bash
 server {
+	logs			full;		# Niveau de logs (none/full/short/count)
 	host			localhost;	# Adresse du serveur
 	port			3490;		# Port ouvert du serveur
 	server_name		default;	# Nom du serveur
 	error			err/;		# Dossier contenant le template error
-	body_limit		10M;		# Taille MAX du corp de requete
+	body_limit		10M;		# Taille MAX du corp de requete (M/K/ )
 
 	# Définie une route
 	location / {
-		methods 	GET, POST, DELETE;	# Méthodes permises
+		methods 	GET, POST, DELETE;		# Méthodes permises (GET/POST/DELETE/PUT)
 		index		index.html;			# Index
 		root		www/;				# Root
-		cgi			.php, cgi/php-cgi-ubuntu;	# L'extension du cgi et son chemin
+		cgi		.php, cgi/php-cgi-ubuntu;	# L'extension du cgi et son chemin
+		cgi		.py, cgi/py-cgi;		# D'autres CGI ...
 	}
 
-	location /data {
-		methods 	GET, POST, DELETE;
-		index		index.html;
-		root		test/;
+	location /upload {
+		methods 	POST, DELETE, PUT;
+		root		www/uploads/;
 	}
-}
 }
 ```
 
