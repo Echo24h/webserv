@@ -177,7 +177,10 @@ void Response::_construct_multipartformdata( void ) {
 							// Extraire le contenu du fichier
 							size_t fileContentStart = fileContentPos + 4;
 							std::string fileContent = part.substr(fileContentStart);
-							create_file(_request->get_real_path() + filename, fileContent);
+							if (is_directory(_request->get_real_path()))
+								create_file(_request->get_real_path() + filename, fileContent);
+							else
+								_code = HTTP::NOT_FOUND;
 						}
 						else {
 							std::cerr << WARN << "[Resonse.cpp] _construct_multipartformdata() : Impossible de trouver le contenu du fichier dans la partie multipart." << std::endl;
