@@ -2,7 +2,7 @@
 <img height="300" src="https://github.com/gborneGit/gborneGit/blob/main/webserv_log.png" alt="Logs console Webserv"/>
 </p>
 
-# Serveur HTTP en C++98 inspiré de NGINX
+# Serveur HTTP en C++98 inspiré de NGINX (Mac & Linux)
 
 Webserv est un serveur HTTP écrit en C++98 inspiré de NGINX. Le serveur prend en charge les méthodes HTTP GET, POST, PUT et DELETE et peut être configuré pour gérer plusieurs connexions simultanément.
 
